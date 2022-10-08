@@ -1,0 +1,10 @@
+E:\Dokumenty\INA-Generations\INA\INA-Generations\INA-Generations\bin\Debug\netstandard2.0\INA-Generations.deps.json
+E:\Dokumenty\INA-Generations\INA\INA-Generations\INA-Generations\bin\Debug\netstandard2.0\INA-Generations.dll
+E:\Dokumenty\INA-Generations\INA\INA-Generations\INA-Generations\bin\Debug\netstandard2.0\INA-Generations.pdb
+E:\Dokumenty\INA-Generations\INA\INA-Generations\INA-Generations\obj\Debug\netstandard2.0\INA-Generations.csproj.AssemblyReference.cache
+E:\Dokumenty\INA-Generations\INA\INA-Generations\INA-Generations\obj\Debug\netstandard2.0\INA-Generations.GeneratedMSBuildEditorConfig.editorconfig
+E:\Dokumenty\INA-Generations\INA\INA-Generations\INA-Generations\obj\Debug\netstandard2.0\INA-Generations.AssemblyInfoInputs.cache
+E:\Dokumenty\INA-Generations\INA\INA-Generations\INA-Generations\obj\Debug\netstandard2.0\INA-Generations.AssemblyInfo.cs
+E:\Dokumenty\INA-Generations\INA\INA-Generations\INA-Generations\obj\Debug\netstandard2.0\INA-Generations.csproj.CoreCompileInputs.cache
+E:\Dokumenty\INA-Generations\INA\INA-Generations\INA-Generations\obj\Debug\netstandard2.0\INA-Generations.dll
+E:\Dokumenty\INA-Generations\INA\INA-Generations\INA-Generations\obj\Debug\netstandard2.0\INA-Generations.pdb

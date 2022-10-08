@@ -1,0 +1,89 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v6.0/osx-arm64",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v6.0": {},
+    ".NETCoreApp,Version=v6.0/osx-arm64": {
+      "INA-Generations.Mac/1.0.0": {
+        "dependencies": {
+          "Eto.Platform.Mac64": "2.7.1",
+          "INA-Generations": "1.0.0"
+        },
+        "runtime": {
+          "INA-Generations.Mac.dll": {}
+        }
+      },
+      "Eto.Forms/2.7.1": {
+        "dependencies": {
+          "System.ComponentModel.Annotations": "5.0.0"
+        },
+        "runtime": {
+          "lib/netstandard2.0/Eto.dll": {
+            "assemblyVersion": "2.7.0.0",
+            "fileVersion": "2.7.8253.40696"
+          }
+        }
+      },
+      "Eto.Platform.Mac64/2.7.1": {
+        "dependencies": {
+          "Eto.Forms": "2.7.1"
+        },
+        "runtime": {
+          "lib/netstandard2.0/Eto.Mac64.dll": {
+            "assemblyVersion": "2.7.0.0",
+            "fileVersion": "2.7.8253.40696"
+          },
+          "lib/netstandard2.0/MonoMac.dll": {
+            "assemblyVersion": "0.0.1.0",
+            "fileVersion": "0.0.1.0"
+          }
+        }
+      },
+      "System.ComponentModel.Annotations/5.0.0": {},
+      "INA-Generations/1.0.0": {
+        "dependencies": {
+          "Eto.Forms": "2.7.1"
+        },
+        "runtime": {
+          "INA-Generations.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "INA-Generations.Mac/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Eto.Forms/2.7.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-6y0fSojK1tJSH88dXNKDstT7IS4SP9boHQbNbCkzyWAYavBTsgYGSYEV6nukJTPpKrj/GB1Goh1G3upTbljbBA==",
+      "path": "eto.forms/2.7.1",
+      "hashPath": "eto.forms.2.7.1.nupkg.sha512"
+    },
+    "Eto.Platform.Mac64/2.7.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-TqbpkYwIFtKIxNIY4BJULVHx7UaPUexvaCMKIHSQcKYBqR7wO76e+AQrlPJoz3LCzq0qKFK34Ch5Okcq6m/BTA==",
+      "path": "eto.platform.mac64/2.7.1",
+      "hashPath": "eto.platform.mac64.2.7.1.nupkg.sha512"
+    },
+    "System.ComponentModel.Annotations/5.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-dMkqfy2el8A8/I76n2Hi1oBFEbG1SfxD2l5nhwXV3XjlnOmwxJlQbYpJH4W51odnU9sARCSAgv7S3CyAFMkpYg==",
+      "path": "system.componentmodel.annotations/5.0.0",
+      "hashPath": "system.componentmodel.annotations.5.0.0.nupkg.sha512"
+    },
+    "INA-Generations/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

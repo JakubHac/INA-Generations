@@ -1,0 +1,2 @@
+E:\Dokumenty\INA-Generations\INA\INA-Generations\INA-Generations.Mac\obj\Debug\net6.0\macbuild\publish\osx-arm64\INA-Generations.pdb
+E:\Dokumenty\INA-Generations\INA\INA-Generations\INA-Generations.Mac\obj\Debug\net6.0\macbuild\publish\osx-arm64\INA-Generations.Mac
