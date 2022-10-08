@@ -49,7 +49,12 @@ namespace INA_Generations
 							LOutput
 						}
 					},
-					OutputTable
+					new Scrollable()
+					{
+						Height = 250,
+						Content = OutputTable
+					}
+					//OutputTable
 				}
 			};
 		}
@@ -69,6 +74,7 @@ namespace INA_Generations
 			OutputTable = new GridView()
 			{
 				DataStore = new ObservableCollection<Specimen>(),
+				
 				Width = 800,
 				Columns =
 				{
