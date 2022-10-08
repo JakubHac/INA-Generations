@@ -74,7 +74,6 @@ namespace INA_Generations
 			OutputTable = new GridView()
 			{
 				DataStore = new ObservableCollection<Specimen>(),
-				
 				Width = 800,
 				Columns =
 				{
@@ -139,6 +138,15 @@ namespace INA_Generations
 						DataCell = new TextBoxCell
 						{
 							Binding = Binding.Property<Specimen, string>(x => x.xReal_xInt.ToString())
+						}
+					},
+					new GridColumn()
+					{
+						Width = 100,
+						HeaderText = "F(xReal)",
+						DataCell = new TextBoxCell
+						{
+							Binding = Binding.Property<Specimen, string>(x => x.FxReal.ToString())
 						}
 					}
 					// ,new GridColumn()

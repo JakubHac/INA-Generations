@@ -12,6 +12,7 @@ namespace INA_Generations
 		public long xInt_xBin;
 		public double xReal_xInt;
 		public double truexReal_xInt;
+		public double FxReal;
 
 		public Specimen(double a, double b, long lp, int l, double d)
 		{
@@ -30,6 +31,7 @@ namespace INA_Generations
 			xInt_xBin = Convert.ToInt64(xBin_xInt, 2);
 			truexReal_xInt = ((b - a) * xInt_xBin) / (Math.Pow(2.0, l) - 1.0) + a;
 			xReal_xInt = Math.Round(truexReal_xInt, accuracy);
+			FxReal = (xReal % 1.0) * (Math.Cos(20.0 + Math.PI + xReal)) - Math.Sin(xReal);
 		}
 	}
 }
