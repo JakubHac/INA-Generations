@@ -20,7 +20,7 @@ namespace INA_Generations
 		public MainForm()
 		{
 			Title = "INA Generacje Hac 19755";
-			MinimumSize = new Size(700, 400);
+			MinimumSize = new Size(900, 400);
 
 			var inputs = CreateInputs();
 			LOutput = new Label()
@@ -69,7 +69,7 @@ namespace INA_Generations
 			OutputTable = new GridView()
 			{
 				DataStore = new ObservableCollection<Specimen>(),
-				Width = 600,
+				Width = 800,
 				Columns =
 				{
 					new GridColumn()
@@ -81,6 +81,15 @@ namespace INA_Generations
 							Binding = Binding.Property<Specimen, string>(x => x.LP.ToString())
 						}
 					},
+					// new GridColumn()
+					// {
+					// 	Width = 100,
+					// 	HeaderText = "true xReal",
+					// 	DataCell = new TextBoxCell
+					// 	{
+					// 		Binding = Binding.Property<Specimen, string>(x => x.truexReal.ToString())
+					// 	}
+					// },
 					new GridColumn()
 					{
 						Width = 100,
@@ -126,6 +135,15 @@ namespace INA_Generations
 							Binding = Binding.Property<Specimen, string>(x => x.xReal_xInt.ToString())
 						}
 					}
+					// ,new GridColumn()
+					// {
+					// 	Width = 100,
+					// 	HeaderText = "xInt -> truexReal",
+					// 	DataCell = new TextBoxCell
+					// 	{
+					// 		Binding = Binding.Property<Specimen, string>(x => x.truexReal_xInt.ToString())
+					// 	}
+					// }
 				},
 			};
 		}
