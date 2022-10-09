@@ -31,7 +31,7 @@ namespace INA_Generations
 			xInt_xBin = Convert.ToInt64(xBin_xInt, 2);
 			truexReal_xInt = ((b - a) * xInt_xBin) / (Math.Pow(2.0, l) - 1.0) + a;
 			xReal_xInt = Math.Round(truexReal_xInt, accuracy);
-			FxReal = (xReal % 1.0) * (Math.Cos(20.0 + Math.PI + xReal)) - Math.Sin(xReal);
+			FxReal = (xReal % 1.0) * (Math.Cos(20.0 * Math.PI * xReal) - Math.Sin(xReal));
 		}
 	}
 }
