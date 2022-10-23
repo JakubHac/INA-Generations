@@ -4,7 +4,7 @@ namespace INA_Generations
 {
 	public class Specimen
 	{
-		public double LP;
+		public long LP;
 		public double truexReal;
 		public double xReal;
 		public long xInt_xReal;
