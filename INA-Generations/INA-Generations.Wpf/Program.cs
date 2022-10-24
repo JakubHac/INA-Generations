@@ -9,7 +9,8 @@ namespace INA_Generations.Wpf
 		[STAThread]
 		public static void Main(string[] args)
 		{
-			new Application(Platforms.Wpf).Run(new MainForm());
+			Singleton.Platform = Platforms.Wpf;
+			new Application(Singleton.Platform).Run(new MainForm());
 		}
 	}
 }

@@ -1,7 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using Eto;
+﻿using System.Collections.ObjectModel;
+using System.Linq;
+using System.Reflection;
 using Eto.Drawing;
 using Eto.Forms;
 
@@ -54,112 +53,41 @@ namespace INA_Generations
 						Height = 250,
 						Content = OutputTable
 					}
-					//OutputTable
 				}
 			};
 		}
 
 		private void ClearOutputTable()
 		{
-			((ObservableCollection<Specimen>)OutputTable.DataStore).Clear();
+			((ObservableCollection<DataRow>)OutputTable.DataStore).Clear();
 		}
 
 		private void AddSpecimenToOutput(Specimen specimen)
 		{
-			((ObservableCollection<Specimen>)OutputTable.DataStore).Add(specimen);
+			((ObservableCollection<DataRow>)OutputTable.DataStore).Add(new DataRow(){OriginalSpecimen = specimen});
 		}
 
 		private void CreateOutputTable()
 		{
 			OutputTable = new GridView()
 			{
-				DataStore = new ObservableCollection<Specimen>(),
-				Width = 800,
-				Columns =
-				{
-					new GridColumn()
-					{
-						Width = 100,
-						HeaderText = "n",
-						DataCell = new TextBoxCell
-						{
-							Binding = Binding.Property<Specimen, string>(x => x.LP.ToString())
-						}
-					},
-					// new GridColumn()
-					// {
-					// 	Width = 100,
-					// 	HeaderText = "true xReal",
-					// 	DataCell = new TextBoxCell
-					// 	{
-					// 		Binding = Binding.Property<Specimen, string>(x => x.truexReal.ToString())
-					// 	}
-					// },
-					new GridColumn()
-					{
-						Width = 100,
-						HeaderText = "xReal",
-						DataCell = new TextBoxCell
-						{
-							Binding = Binding.Property<Specimen, string>(x => x.xReal.ToString())
-						}
-					},
-					new GridColumn()
-					{
-						Width = 100,
-						HeaderText = "xReal -> xInt",
-						DataCell = new TextBoxCell
-						{
-							Binding = Binding.Property<Specimen, string>(x => x.xInt_xReal.ToString())
-						}
-					},
-					new GridColumn()
-					{
-						Width = 100,
-						HeaderText = "xInt -> xBin",
-						DataCell = new TextBoxCell
-						{
-							Binding = Binding.Property<Specimen, string>(x => x.xBin_xInt.ToString())
-						}
-					},
-					new GridColumn()
-					{
-						Width = 100,
-						HeaderText = "xBin -> xInt",
-						DataCell = new TextBoxCell
-						{
-							Binding = Binding.Property<Specimen, string>(x => x.xInt_xBin.ToString())
-						}
-					},
-					new GridColumn()
-					{
-						Width = 100,
-						HeaderText = "xInt -> xReal",
-						DataCell = new TextBoxCell
-						{
-							Binding = Binding.Property<Specimen, string>(x => x.xReal_xInt.ToString())
-						}
-					},
-					new GridColumn()
-					{
-						Width = 100,
-						HeaderText = "F(xReal)",
-						DataCell = new TextBoxCell
-						{
-							Binding = Binding.Property<Specimen, string>(x => x.FxReal.ToString())
-						}
-					}
-					// ,new GridColumn()
-					// {
-					// 	Width = 100,
-					// 	HeaderText = "xInt -> truexReal",
-					// 	DataCell = new TextBoxCell
-					// 	{
-					// 		Binding = Binding.Property<Specimen, string>(x => x.truexReal_xInt.ToString())
-					// 	}
-					// }
-				},
+				DataStore = new ObservableCollection<DataRow>(),
+				Width = 800
 			};
+
+			foreach (PropertyInfo property in typeof(DataRow).GetProperties())
+			{
+				if (property.PropertyType != typeof((string, string))) continue;
+				
+				OutputTable.Columns.Add(new GridColumn()
+				{
+					HeaderText = (((string title, string))property.GetValue(DataRow.Empty)).title,
+					DataCell = new TextBoxCell()
+					{
+						Binding = Binding.Property<DataRow, string>(x => (((string, string value))property.GetValue(x)).value)
+					}
+				});
+			}
 		}
 
 		private StackLayout CreateInputs()

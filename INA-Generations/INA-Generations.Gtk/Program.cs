@@ -8,7 +8,8 @@ namespace INA_Generations.Gtk
 		[STAThread]
 		public static void Main(string[] args)
 		{
-			new Application(Eto.Platforms.Gtk).Run(new MainForm());
+			Singleton.Platform = Eto.Platforms.Gtk;
+			new Application(Singleton.Platform).Run(new MainForm());
 		}
 	}
 }

@@ -1,9 +1,10 @@
 ﻿using System;
+using System.Collections.ObjectModel;
 using Eto.Forms;
 
 namespace INA_Generations
 {
-	public partial class MainForm : Form
+	public partial class MainForm
 	{
 		private void ExecuteGeneration()
 		{
@@ -34,6 +35,13 @@ namespace INA_Generations
 				generation[i] = specimen;
 				AddSpecimenToOutput(specimen);
 			}
+
+			foreach (var row in ((ObservableCollection<DataRow>)OutputTable.DataStore))
+			{
+				row.RandomizeSelection();
+				OutputTable.Invalidate();
+			}
+			
 		}
 		
 	}

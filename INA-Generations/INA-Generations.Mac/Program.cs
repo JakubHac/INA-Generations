@@ -8,7 +8,8 @@ namespace INA_Generations.Mac
 		[STAThread]
 		public static void Main(string[] args)
 		{
-			new Application(Eto.Platforms.Mac64).Run(new MainForm());
+			Singleton.Platform = Eto.Platforms.Mac64;
+			new Application(Singleton.Platform).Run(new MainForm());
 		}
 	}
 }
