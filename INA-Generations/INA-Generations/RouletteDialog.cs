@@ -12,7 +12,6 @@ namespace INA_Generations
 		public double Value;
 		private Bitmap Bitmap;
 		private Graphics Graphics;
-		private ImageView ImageView;
 		int imageSize = 600;
 
 		public RouletteDialog()
@@ -20,10 +19,6 @@ namespace INA_Generations
 			Title = "Koło Fortuny Jakuba Hac. Wszelkie prawa zastrzeżone";
 			Bitmap = new Bitmap(imageSize, imageSize, PixelFormat.Format32bppRgb);
 			Graphics = new Graphics(Bitmap);
-			ImageView = new ImageView()
-			{
-				Image = Bitmap
-			};
 			DrawWheel();
 			
 			Application.Instance.InvokeAsync(Animate);
@@ -39,17 +34,12 @@ namespace INA_Generations
 
 			Graphics.DrawEllipse(Colors.Black, 0, 0, imageSize, imageSize);
 			Graphics.DrawLine(Colors.Red, imageSize / 2f, 0f, imageSize / 2f, 100);
-
 			double result = (1.0 - ((offset + 90.0) % 360.0 / 360.0));
-			
 			Graphics.DrawText(Fonts.Monospace(36f), Colors.Red, imageSize/2f - 150f, 150, $"{result:0.00000000}" );
 			Graphics.Flush();
-			Content = new StackLayout()
+			Content = new ImageView()
 			{
-				Items =
-				{
-					ImageView
-				}
+				Image = Bitmap
 			};
 			return result;
 		}
@@ -60,13 +50,13 @@ namespace INA_Generations
 			{
 				await Task.Delay(16);
 
-				float angleChange = (float)(Singleton.Random.NextDouble() * 60f + 60f);
-				float angle = (float)(Singleton.Random.NextDouble() * 360.0);
+				double angleChange = Singleton.Random.NextDouble() * 60.0 + 60.0;
+				double angle = Singleton.Random.NextDouble() * 360.0;
 
-				while (angleChange > 0f)
+				while (angleChange > 0.0)
 				{
 					angle += angleChange;
-					angleChange -= (float)(1.0 + Singleton.Random.NextDouble());
+					angleChange -= 1.0 + Singleton.Random.NextDouble();
 					Value = DrawWheel(angle);
 					await Task.Delay(16);
 				}
