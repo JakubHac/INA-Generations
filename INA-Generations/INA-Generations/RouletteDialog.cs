@@ -9,59 +9,49 @@ namespace INA_Generations
 {
 	public class RouletteDialog : Dialog
 	{
-		public double Value = Singleton.Random.NextDouble();
-		private ProgressBar Roulette;
+		public double Value;
+		private Bitmap Bitmap;
+		private Graphics Graphics;
+		private ImageView ImageView;
+		int imageSize = 600;
 
 		public RouletteDialog()
 		{
-			Width = 600;
-			Height = 200;
-
-			Roulette = new ProgressBar()
+			Title = "Koło Fortuny Jakuba Hac. Wszelkie prawa zastrzeżone";
+			Bitmap = new Bitmap(imageSize, imageSize, PixelFormat.Format32bppRgb);
+			Graphics = new Graphics(Bitmap);
+			ImageView = new ImageView()
 			{
-				Width = 600,
-				Height = 200
+				Image = Bitmap
 			};
-			Roulette.MinValue = 0;
-			Roulette.MaxValue = 100_000_000;
-			Roulette.Value = 0;
+			DrawWheel();
 			
+			Application.Instance.InvokeAsync(Animate);
+		}
+
+		private double DrawWheel(double offset = 0f)
+		{
+			Graphics.Clear(Colors.White);
+			for (int j = 0; j < 360; j += 3)
+			{
+				Graphics.FillPie(new Color(j / 360f, j / 360f, j / 360f), 0f, 0f, imageSize, imageSize, j + (float)offset, 3.5f);
+			}
+
+			Graphics.DrawEllipse(Colors.Black, 0, 0, imageSize, imageSize);
+			Graphics.DrawLine(Colors.Red, imageSize / 2f, 0f, imageSize / 2f, 100);
+
+			double result = (1.0 - ((offset + 90.0) % 360.0 / 360.0));
+			
+			Graphics.DrawText(Fonts.Monospace(36f), Colors.Red, imageSize/2f - 150f, 150, $"{result:0.00000000}" );
+			Graphics.Flush();
 			Content = new StackLayout()
 			{
 				Items =
 				{
-					Roulette
+					ImageView
 				}
-
 			};
-			
-			Application.Instance.InvokeAsync(Animate);
-
-			string PrintPair(KeyValuePair<object, object> pair)
-			{
-				string result = "";
-				try
-				{
-					result += pair.Key.ToString();
-				}
-				catch (Exception e)
-				{
-					result += "could not get key";
-				}
-
-				result += " : ";
-				
-				try
-				{
-					result += pair.Value.ToString();
-				}
-				catch (Exception e)
-				{
-					result += "could not get value";
-				}
-
-				return result;
-			}
+			return result;
 		}
 
 		public async Task Animate()
@@ -70,15 +60,16 @@ namespace INA_Generations
 			{
 				await Task.Delay(16);
 
-				for (int i = 0; i < 100_000_000 / 2_000_000; i++)
+				float angleChange = (float)(Singleton.Random.NextDouble() * 60f + 60f);
+				float angle = (float)(Singleton.Random.NextDouble() * 360.0);
+
+				while (angleChange > 0f)
 				{
-					Roulette.Value = i * 2_000_000;
-					Roulette.Invalidate();
+					angle += angleChange;
+					angleChange -= (float)(1.0 + Singleton.Random.NextDouble());
+					Value = DrawWheel(angle);
 					await Task.Delay(16);
 				}
-			
-				Roulette.Value = (int)Math.Round(Value * 100_000_000);
-				Roulette.Invalidate();
 				await Task.Delay(500);
 				Close();
 			}

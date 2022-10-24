@@ -10,16 +10,11 @@ namespace INA_Generations
 
 		public static double GetRandomWithRoulette()
 		{
-			if (RandomRoulette)
-			{
-				var roulette = new RouletteDialog();
-				roulette.ShowModal();
-				return roulette.Value;
-			}
-			else
-			{
-				return Random.NextDouble();
-			}
+			if (!RandomRoulette) return Random.NextDouble();
+			var roulette = new RouletteDialog();
+			roulette.ShowModal();
+			return roulette.Value;
+
 		}
 	}
 }
