@@ -16,10 +16,14 @@ namespace INA_Generations
 		private GridView OutputTable;
 		private Label LOutput;
 
+		private Command RouletteToggle;
+
 		public MainForm()
 		{
 			Title = "INA Generacje Hac 19755";
 			MinimumSize = new Size(900, 400);
+			
+			CreateMenu();
 
 			var inputs = CreateInputs();
 			LOutput = new Label()
@@ -57,6 +61,34 @@ namespace INA_Generations
 			};
 		}
 
+		private void CreateMenu()
+		{
+			CreateRouletteToggle();
+			
+			
+			Menu = new MenuBar
+			{
+				Items =
+				{
+					new SubMenuItem { Text = "Preferencje", Items = { RouletteToggle } },
+				}
+			};
+		}
+
+		private void CreateRouletteToggle()
+		{
+			RouletteToggle = new Command { MenuText = $"Ruletka {(Singleton.RandomRoulette ? "Włączona" : "Wyłączona")}" };
+			RouletteToggle.Executed += (sender, e) => ToggleRoulette();
+			
+			void ToggleRoulette()
+			{
+				Singleton.RandomRoulette = !Singleton.RandomRoulette;
+				CreateMenu();
+			}
+		}
+
+		
+		
 		private void ClearOutputTable()
 		{
 			((ObservableCollection<DataRow>)OutputTable.DataStore).Clear();
