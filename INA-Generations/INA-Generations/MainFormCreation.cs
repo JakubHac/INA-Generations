@@ -1,5 +1,4 @@
 ﻿using System.Collections.ObjectModel;
-using System.Linq;
 using System.Reflection;
 using Eto.Drawing;
 using Eto.Forms;
@@ -17,6 +16,7 @@ namespace INA_Generations
 		private Label LOutput;
 
 		private Command RouletteToggle;
+		private Command TargetToggle;
 
 		public MainForm()
 		{
@@ -64,15 +64,32 @@ namespace INA_Generations
 		private void CreateMenu()
 		{
 			CreateRouletteToggle();
-			
+			CreateTargetToggle();
 			
 			Menu = new MenuBar
 			{
 				Items =
 				{
-					new SubMenuItem { Text = "Preferencje", Items = { RouletteToggle } },
+					new SubMenuItem { Text = "Preferencje", Items =
+						{
+							RouletteToggle,
+							TargetToggle
+						} 
+					},
 				}
 			};
+		}
+
+		private void CreateTargetToggle()
+		{
+			TargetToggle = new Command { MenuText = $"Szukaj {(Singleton.LookingForMax ? "Maximum" : "Minimum")}" };
+			TargetToggle.Executed += (sender, e) => ToggleTarget();
+			
+			void ToggleTarget()
+			{
+				Singleton.LookingForMax = !Singleton.LookingForMax;
+				CreateMenu();
+			}
 		}
 
 		private void CreateRouletteToggle()
@@ -94,9 +111,11 @@ namespace INA_Generations
 			((ObservableCollection<DataRow>)OutputTable.DataStore).Clear();
 		}
 
-		private void AddSpecimenToOutput(Specimen specimen)
+		private DataRow CreateDataRowForSpecimen(Specimen specimen)
 		{
-			((ObservableCollection<DataRow>)OutputTable.DataStore).Add(new DataRow(){OriginalSpecimen = specimen});
+			DataRow dataRow = new DataRow() { OriginalSpecimen = specimen };
+			((ObservableCollection<DataRow>)OutputTable.DataStore).Add(dataRow);
+			return dataRow;
 		}
 
 		private void CreateOutputTable()
