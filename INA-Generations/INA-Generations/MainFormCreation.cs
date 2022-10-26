@@ -11,6 +11,7 @@ namespace INA_Generations
 		private TextBox AInput;
 		private TextBox BInput;
 		private DropDown DInput;
+		
 		private TextBox NInput;
 		private Button StartButton;
 		private GridView OutputTable;
@@ -19,11 +20,13 @@ namespace INA_Generations
 		private TextBox PKValue;
 		private Slider PMSlider;
 		private TextBox PMValue;
-
-		private Command RouletteToggle;
-		private Command TargetToggle;
-
+		
+		private DropDown RouletteTypeDropdown;
+		private DropDown TargetFunctionDropdown;
+		
 		private Scrollable OutputTableScrollable;
+		
+		const int inputsSeparation = 30;
 
 		public MainForm()
 		{
@@ -32,14 +35,23 @@ namespace INA_Generations
 			Height = 400;
 			MinimumSize = new Size(1200, 400);
 			Resizable = true;
-			
-			CreateMenu();
-
 			var inputs = CreateInputs();
 			LOutput = new Label()
 			{
 				Text = "0"
 			};
+
+			RouletteTypeDropdown = new DropDown()
+			{
+				Items = { "Wyłączona", "Zakres (0;1)", "Koło Fortuny" },
+				SelectedIndex = 0
+			};
+			TargetFunctionDropdown = new DropDown()
+			{
+				Items = { "Maksimum", "Minimum" },
+				SelectedIndex = 0
+			};
+			
 			CreateOutputTable();
 			
 			Content = new StackLayout
@@ -55,11 +67,14 @@ namespace INA_Generations
 						Padding = 10,
 						Items =
 						{
-							new Label()
-							{
-								Text = "L:"
-							},
-							LOutput
+							Label("L:"),
+							LOutput,
+							SeparationPanel(),
+							Label("Ruletka:"),
+							RouletteTypeDropdown,
+							SeparationPanel(),
+							Label("Funkcja Celu:"),
+							TargetFunctionDropdown
 						}
 					},
 					OutputTableScrollable
@@ -81,52 +96,10 @@ namespace INA_Generations
 			};
 		}
 
-		private void CreateMenu()
-		{
-			CreateRouletteToggle();
-			CreateTargetToggle();
-			
-			Menu = new MenuBar
-			{
-				Items =
-				{
-					new SubMenuItem { Text = "Preferencje", Items =
-						{
-							RouletteToggle,
-							TargetToggle
-						} 
-					},
-				}
-			};
-		}
-
-		private void CreateTargetToggle()
-		{
-			TargetToggle = new Command { MenuText = $"Szukaj {(Singleton.LookingForMax ? "Maximum" : "Minimum")}" };
-			TargetToggle.Executed += (sender, e) => ToggleTarget();
-			
-			void ToggleTarget()
-			{
-				Singleton.LookingForMax = !Singleton.LookingForMax;
-				CreateMenu();
-			}
-		}
-
-		private void CreateRouletteToggle()
-		{
-			RouletteToggle = new Command { MenuText = $"Ruletka {(Singleton.RandomRoulette ? "Włączona" : "Wyłączona")}" };
-			RouletteToggle.Executed += (sender, e) => ToggleRoulette();
-			
-			void ToggleRoulette()
-			{
-				Singleton.RandomRoulette = !Singleton.RandomRoulette;
-				CreateMenu();
-			}
-		}
-		
 		private void ClearOutputTable()
 		{
 			((ObservableCollection<DataRow>)OutputTable.DataStore).Clear();
+			OutputTable.Invalidate();
 		}
 
 		private DataRow CreateDataRowForSpecimen(Specimen specimen, long lp)
@@ -275,7 +248,7 @@ namespace INA_Generations
 				Command = new Command((sender, args) => ExecuteGeneration())
 			};
 			
-			int inputsSeparation = 30;
+			
 
 			var inputs = new StackLayout()
 			{
@@ -310,31 +283,33 @@ namespace INA_Generations
 				}
 			};
 
-			Label Label(string text, string tooltip = null)
-			{
-				if (tooltip == null)
-				{
-					return new Label()
-					{
-						Text = text
-					};
-				}
-				return new Label()
-				{
-					Text = text,
-					ToolTip = tooltip
-				};
-			}
-
-			Panel SeparationPanel()
-			{
-				return new Panel()
-				{
-					Width = inputsSeparation
-				};
-			}
+			
 
 			return inputs;
+		}
+		
+		Label Label(string text, string tooltip = null)
+		{
+			if (tooltip == null)
+			{
+				return new Label()
+				{
+					Text = text
+				};
+			}
+			return new Label()
+			{
+				Text = text,
+				ToolTip = tooltip
+			};
+		}
+
+		Panel SeparationPanel()
+		{
+			return new Panel()
+			{
+				Width = inputsSeparation
+			};
 		}
 
 		private void SyncPKValueToSlider()

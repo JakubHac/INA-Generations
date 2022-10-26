@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace INA_Generations
@@ -9,7 +10,7 @@ namespace INA_Generations
 
 		public Specimen OriginalSpecimen = null;
 		public double SelectionRandom;
-		public double ParentRandom;
+		public double ParentRandom = Double.PositiveInfinity;
 		public int? PCValue = null;
 		public SortedSet<int> MutatedGenesValue = new SortedSet<int>();
 		public DataRow(Specimen originalSpecimen, long index)
@@ -25,7 +26,31 @@ namespace INA_Generations
 		
 		public void RandomizeParenting()
 		{
-			ParentRandom = Singleton.GetRandomWithRoulette();
+			switch (Singleton.RandomRoulette)
+			{
+				case RouletteType.Disabled:
+				case RouletteType.Gradient:
+					ParentRandom = Singleton.GetRandomWithRoulette();
+					break;
+				case RouletteType.PieChart:
+					if (Singleton.PK <= 0.0 + double.Epsilon)
+					{
+						ParentRandom = 0.0;
+					}
+					else
+					{
+						List<(bool obj, string displayName, double chance)> pieChart =
+							new List<(bool obj, string displayName, double chance)>()
+							{
+								(true, "Zostań Rodzicem", Singleton.PK - double.Epsilon),
+								(false, "Nie Bądź Rodzicem", 1f - Singleton.PK)
+							};
+						var result = Singleton.GetRandomWithRoulette(pieChart);
+						ParentRandom = result.r;
+					}
+					break;
+			}
+			
 		}
 
 		public (string, string) N => ("N", Index.ToString());
