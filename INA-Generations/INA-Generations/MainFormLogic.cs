@@ -144,7 +144,7 @@ namespace INA_Generations
 							possiblePC.Add((
 								j, 
 								$"{row.FirstParentXBin.Item2.Substring(0, j)} | {row.SecondParentXBin.Item2.Substring(j)}"
-								, ((float) j) / ((float)Singleton.l - 1f)));
+								, 1f / ((float)Singleton.l - 1f)));
 						}
 						var result = Singleton.GetRandomWithRoulette(possiblePC);
 						row.PCValue = result.result;
