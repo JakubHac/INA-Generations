@@ -202,7 +202,6 @@ namespace INA_Generations
 					case RouletteType.Gradient:
 						row.RandomizeSelection();
 						int selectedIndex = data.Count - 1;
-						double lastQ = 0.0;
 						for (int i = 0; i < data.Count; i++)
 						{
 							if (data[i].QxValue >= row.SelectionRandom)
