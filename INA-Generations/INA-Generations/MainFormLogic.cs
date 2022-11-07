@@ -74,58 +74,98 @@ namespace INA_Generations
 			{
 				AddDataToTable(data);
 			}
-			
-			Stopwatch benchmark = Stopwatch.StartNew();
+
+			bool isBenchmarkRun = BenchmarkCheckbox.Checked.Value && t == 1;
+			Stopwatch benchmark =isBenchmarkRun ? Stopwatch.StartNew() : null;
 			List<(string,long)> benchmarks = new List<(string, long)>();
 
 			for (int i = 0; i < t; i++)
 			{
 				CalculateGx(data);
-				benchmarks.Add(("Gx", benchmark.ElapsedMilliseconds));
-				benchmark.Restart();
+				if (isBenchmarkRun)
+				{
+					benchmarks.Add(("Gx", benchmark.ElapsedMilliseconds));
+					benchmark.Restart();
+				}
 				CalculatePx(data);
-				benchmarks.Add(("Px", benchmark.ElapsedMilliseconds));
-				benchmark.Restart();
+				if (isBenchmarkRun)
+				{
+					benchmarks.Add(("Px", benchmark.ElapsedMilliseconds));
+					benchmark.Restart();
+				}
 				CalculateQx(data);
-				benchmarks.Add(("Qx", benchmark.ElapsedMilliseconds));
-				benchmark.Restart();
+				if (isBenchmarkRun)
+				{
+					benchmarks.Add(("Qx", benchmark.ElapsedMilliseconds));
+					benchmark.Restart();
+				}
+
 				Selection(data);
-				benchmarks.Add(("Selection", benchmark.ElapsedMilliseconds));
-				benchmark.Restart();
+				if (isBenchmarkRun)
+				{
+					benchmarks.Add(("Selection", benchmark.ElapsedMilliseconds));
+					benchmark.Restart();
+				}
+
 				Parenting(data);
-				benchmarks.Add(("Parenting", benchmark.ElapsedMilliseconds));
-				benchmark.Restart();
+				if (isBenchmarkRun)
+				{
+					benchmarks.Add(("Parenting", benchmark.ElapsedMilliseconds));
+					benchmark.Restart();
+				}
+
 				PairParents(data);
-				benchmarks.Add(("Pairing", benchmark.ElapsedMilliseconds));
-				benchmark.Restart();
+				if (isBenchmarkRun)
+				{
+					benchmarks.Add(("Pairing", benchmark.ElapsedMilliseconds));
+					benchmark.Restart();
+				}
+
 				RandomizePC(data);
-				benchmarks.Add(("Pc", benchmark.ElapsedMilliseconds));
-				benchmark.Restart();
+				if (isBenchmarkRun)
+				{
+					benchmarks.Add(("Pc", benchmark.ElapsedMilliseconds));
+					benchmark.Restart();
+				}
+
 				Fuck(data);
-				benchmarks.Add(("Fucking", benchmark.ElapsedMilliseconds));
-				benchmark.Restart();
+				if (isBenchmarkRun)
+				{
+					benchmarks.Add(("Fucking", benchmark.ElapsedMilliseconds));
+					benchmark.Restart();
+				}
+
 				Mutate(data);
-				benchmarks.Add(("Mutating", benchmark.ElapsedMilliseconds));
-				benchmark.Restart();
+				if (isBenchmarkRun)
+				{
+					benchmarks.Add(("Mutating", benchmark.ElapsedMilliseconds));
+					benchmark.Restart();
+				}
+
 				Finalize(data);
-				benchmarks.Add(("Finalization", benchmark.ElapsedMilliseconds));
-				benchmark.Restart();
+				if (isBenchmarkRun)
+				{
+					benchmarks.Add(("Finalization", benchmark.ElapsedMilliseconds));
+					benchmark.Restart();
+				}
+
 				if (i + 1 < t)
 				{
 					MoveDataToNextGeneration(data, elite);
-					benchmarks.Add(("Moving Data", benchmark.ElapsedMilliseconds));
-					benchmark.Restart();
 				}
 			}
 
 			if (!addDataAtStart)
 			{
 				AddDataToTable(data);
-				benchmarks.Add(("Display", benchmark.ElapsedMilliseconds));
-				benchmark.Stop();
+				if (isBenchmarkRun)
+				{
+					benchmarks.Add(("Display", benchmark.ElapsedMilliseconds));
+					benchmark.Stop();
+				}
 			}
 
-			if (BenchmarkCheckbox.Checked.Value)
+			if (isBenchmarkRun && BenchmarkCheckbox.Checked.Value)
 			{
 				MessageBox.Show(benchmarks.Aggregate($"All: {benchmarks.Sum(x => x.Item2)}[ms]", (s, tuple) => $"{s}\n{tuple.Item1}: {tuple.Item2}[ms]"),"Benchmark", MessageBoxType.Information);
 			}

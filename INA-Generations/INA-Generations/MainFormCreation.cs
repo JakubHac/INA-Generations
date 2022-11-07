@@ -142,22 +142,19 @@ namespace INA_Generations
 
 		private void ClearOutputTable()
 		{
-			((ObservableCollection<DataRow>)OutputTable.DataStore).Clear();
+			OutputTable.DataStore = new DataRow[0];
 		}
 		
 		private void AddDataToTable(DataRow[] data)
 		{
-			foreach (var dataRow in data)
-			{
-				((ObservableCollection<DataRow>)OutputTable.DataStore).Add(dataRow);
-			}
+			OutputTable.DataStore = data;
 		}
 
 		private void CreateOutputTable()
 		{
 			OutputTable = new GridView()
 			{
-				DataStore = new ObservableCollection<DataRow>(),
+				DataStore = new DataRow[0],
 				Width = Width - 42
 			};
 
