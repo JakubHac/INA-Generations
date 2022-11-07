@@ -13,6 +13,7 @@ namespace INA_Generations
 		public double ParentRandom = Double.PositiveInfinity;
 		public int? PCValue = null;
 		public SortedSet<int> MutatedGenesValue = new SortedSet<int>();
+
 		public DataRow(Specimen originalSpecimen, long index)
 		{
 			OriginalSpecimen = originalSpecimen;

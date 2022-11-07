@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using Eto.Forms;
 
@@ -13,7 +14,8 @@ namespace INA_Generations
 				    ParseHelper.ParseDouble(AInput.Text, "A", out double a) &&
 				    ParseHelper.ParseDouble(BInput.Text, "B", out double b) &&
 				    ParseHelper.ParseLong(NInput.Text, "N", out long n) &&
-				    ParseHelper.ParseDouble(DInput.SelectedKey, "D", out double d, "en-US")
+				    ParseHelper.ParseDouble(DInput.SelectedKey, "D", out double d, "en-US") &&
+				    ParseHelper.ParseLong(TInput.Text, "T", out long t)
 			    )
 			   )
 			{
@@ -26,13 +28,20 @@ namespace INA_Generations
 				return;
 			}
 
+			if (t < 1)
+			{
+				MessageBox.Show("T < 1, program wygeneruje tylko pierwsze pokolenie", MessageBoxType.Error);
+				return;
+			}
+
 			SyncPKValueToSlider();
 			SyncPMValueToSlider();
 
-			Singleton.PK = PKSlider.Value / 100_000_000.0;
-			Singleton.PM = PMSlider.Value / 100_000_000.0;
+			Singleton.PK = PKSlider.Value / (double)PKSlider.MaxValue;
+			Singleton.PM = PMSlider.Value / (double)PMSlider.MaxValue;
 
 			int l = (int)Math.Floor(Math.Log((b - a) / d, 2) + 1.0);
+			bool elite = EliteCheckbox.Checked.Value;
 
 			Singleton.a = a;
 			Singleton.b = b;
@@ -55,28 +64,78 @@ namespace INA_Generations
 
 			LOutput.Text = l.ToString();
 			ClearOutputTable();
+			DataRow[] data = new DataRow[n];
+			CreateInitialData(data, n);
+			AddDataToTable(data);
+			for (int i = 0; i < t; i++)
+			{
+				CalculateGx(data);
+				CalculatePx(data);
+				CalculateQx(data);
+				Selection(data);
+				Parenting(data);
+				PairParents(data);
+				RandomizePC(data);
+				Fuck(data);
+				Mutate(data);
+				Finalize(data);
+				if (i + 1 < t)
+				{
+					MoveDataToNextGeneration(data, elite);
+				}
+			}
+		}
 
-			List<DataRow> data = new List<DataRow>();
-
+		private void CreateInitialData(DataRow[] data, long n)
+		{
 			for (int i = 0; i < n; i++)
 			{
 				Specimen specimen = new Specimen();
-				data.Add(CreateDataRowForSpecimen(specimen, i + 1));
+				data[i] = new DataRow(specimen, i + 1);
 			}
-
-			CalculateGx(data);
-			CalculatePx(data);
-			CalculateQx(data);
-			Selection(data);
-			Parenting(data);
-			PairParents(data);
-			RandomizePC(data);
-			Fuck(data);
-			Mutate(data);
-			Finalize(data);
 		}
 
-		private void Finalize(List<DataRow> data)
+		private void MoveDataToNextGeneration(DataRow[] data, bool elite)
+		{
+			double? eliteXReal = null;
+			if (elite)
+			{
+				double bestGx = Double.MinValue;
+				foreach (var dataRow in data)
+				{
+					if (dataRow.GxValue > bestGx)
+					{
+						bestGx = dataRow.GxValue;
+						eliteXReal = dataRow.OriginalSpecimen.xReal;
+					}
+				}
+			}
+
+			bool eliteMadeIt = !elite;
+
+			for (int i = 0; i < data.Length; i++)
+			{
+				var temp = data[i];
+				double finalXReal = temp.FinalXRealValue;
+				if (!eliteMadeIt)
+				{
+					if (finalXReal == eliteXReal)
+					{
+						eliteMadeIt = true;
+					}
+				}
+				data[i] = new DataRow(new Specimen(finalXReal), temp.Index);
+			}
+
+			if (elite && !eliteMadeIt)
+			{
+				int index = Singleton.Random.Next(0, data.Length - 1);
+				var temp = data[index];
+				data[index] = new DataRow(new Specimen(eliteXReal.Value), temp.Index);
+			}
+		}
+
+		private void Finalize(DataRow[] data)
 		{
 			foreach (var row in data)
 			{
@@ -85,22 +144,22 @@ namespace INA_Generations
 			}
 		}
 
-		private void Mutate(List<DataRow> data)
+		private void Mutate(DataRow[] data)
 		{
-			for (int i = 0; i < data.Count; i++)
+			foreach (var dataRow in data)
 			{
-				data[i].MutatedGenesValue = new SortedSet<int>();
+				dataRow.MutatedGenesValue = new SortedSet<int>();
 				for (int j = 0; j < Singleton.l; j++)
 				{
 					if (Singleton.Random.NextDouble() < Singleton.PM)
 					{
-						data[i].MutatedGenesValue.Add(j);
+						dataRow.MutatedGenesValue.Add(j);
 					}
 				}
 
-				data[i].MutatedChromosomeValue = data[i].AfterChild.Item2.Select((x, index) =>
+				dataRow.MutatedChromosomeValue = dataRow.AfterChild.Item2.Select((x, index) =>
 				{
-					if (data[i].MutatedGenesValue.Contains(index))
+					if (dataRow.MutatedGenesValue.Contains(index))
 					{
 						return x == '0' ? '1' : '0';
 					}
@@ -110,31 +169,29 @@ namespace INA_Generations
 			}
 		}
 
-		private void Fuck(List<DataRow> data)
+		private void Fuck(DataRow[] data)
 		{
-			for (int i = 0; i < data.Count; i++)
+			foreach (var dataRow in data)
 			{
-				var row = data[i];
-				if (row.ParentsWith == null) continue;
-				row.ChildXBin =
-					$"{row.FirstParentXBin.Item2.Substring(0, row.PCValue.Value)} | {row.SecondParentXBin.Item2.Substring(row.PCValue.Value)}";
+				if (dataRow.ParentsWith == null) continue;
+				dataRow.ChildXBin =
+					$"{dataRow.FirstParentXBin.Item2.Substring(0, dataRow.PCValue.Value)} | {dataRow.SecondParentXBin.Item2.Substring(dataRow.PCValue.Value)}";
 			}
 		}
 
-		private void RandomizePC(List<DataRow> data)
+		private void RandomizePC(DataRow[] data)
 		{
-			for (int i = 0; i < data.Count; i++)
+			foreach (var dataRow in data)
 			{
-				var row = data[i];
-				if (row.ParentsWith == null || row.PCValue != null) continue;
+				if (dataRow.ParentsWith == null || dataRow.PCValue != null) continue;
 				
 				switch (Singleton.RandomRoulette)
 				{
 					case RouletteType.Disabled:
 					case RouletteType.Gradient:
 						int pc = 1 + (int)Math.Round(Singleton.GetRandomWithRoulette() * (Singleton.l - 2));
-						row.PCValue = pc;
-						row.ParentsWith.PCValue = pc;
+						dataRow.PCValue = pc;
+						dataRow.ParentsWith.PCValue = pc;
 						break;
 					case RouletteType.PieChart:
 						List<(int obj, string displayName, double chance)> possiblePC =
@@ -143,30 +200,27 @@ namespace INA_Generations
 						{
 							possiblePC.Add((
 								j, 
-								$"{row.FirstParentXBin.Item2.Substring(0, j)} | {row.SecondParentXBin.Item2.Substring(j)}"
+								$"{dataRow.FirstParentXBin.Item2.Substring(0, j)} | {dataRow.SecondParentXBin.Item2.Substring(j)}"
 								, 1f / ((float)Singleton.l - 1f)));
 						}
 						var result = Singleton.GetRandomWithRoulette(possiblePC);
-						row.PCValue = result.result;
-						row.ParentsWith.PCValue = result.result;
+						dataRow.PCValue = result.result;
+						dataRow.ParentsWith.PCValue = result.result;
 						break;
 				}
-				OutputTable.Invalidate();
 			}
-			
-			
 		}
 
-		private void PairParents(List<DataRow> data)
+		private void PairParents(DataRow[] data)
 		{
-			for (int i = 0; i < data.Count; i++)
+			for (int i = 0; i < data.Length; i++)
 			{
 				DataRow row = data[i];
 				if (!row.isParent || row.ParentsWith != null) continue;
 				DataRow pair = null;
-				if (i + 1 < data.Count)
+				if (i + 1 < data.Length)
 				{
-					for (int j = i + 1; j < data.Count; j++)
+					for (int j = i + 1; j < data.Length; j++)
 					{
 						if (!data[j].isParent) continue;
 						pair = data[j];
@@ -182,7 +236,7 @@ namespace INA_Generations
 			}
 		}
 
-		private void Parenting(List<DataRow> data)
+		private void Parenting(DataRow[] data)
 		{
 			foreach (var row in data)
 			{
@@ -191,7 +245,7 @@ namespace INA_Generations
 			}
 		}
 
-		private void Selection(List<DataRow> data)
+		private void Selection(DataRow[] data)
 		{
 			List<(Specimen OriginalSpecimen, string xBin_xInt, double Px)> chances = data.Select(x => (x.OriginalSpecimen, x.OriginalSpecimen.xBin_xInt, x.PxValue)).ToList();
 			foreach (var row in data)
@@ -201,8 +255,8 @@ namespace INA_Generations
 					case RouletteType.Disabled:
 					case RouletteType.Gradient:
 						row.RandomizeSelection();
-						int selectedIndex = data.Count - 1;
-						for (int i = 0; i < data.Count; i++)
+						int selectedIndex = data.Length - 1;
+						for (int i = 0; i < data.Length; i++)
 						{
 							if (data[i].QxValue >= row.SelectionRandom)
 							{
@@ -224,7 +278,7 @@ namespace INA_Generations
 			}
 		}
 
-		private void CalculateQx(List<DataRow> data)
+		private void CalculateQx(DataRow[] data)
 		{
 			double sum = 0.0;
 			foreach (var dataRow in data)
@@ -234,7 +288,7 @@ namespace INA_Generations
 			}
 		}
 
-		private void CalculatePx(List<DataRow> data)
+		private void CalculatePx(DataRow[] data)
 		{
 			double sum = data.Sum(x => x.GxValue);
 			foreach (var dataRow in data)
@@ -243,7 +297,7 @@ namespace INA_Generations
 			}
 		}
 
-		private static void CalculateGx(List<DataRow> data)
+		private static void CalculateGx(DataRow[] data)
 		{
 			switch (Singleton.TargetFunction)
 			{

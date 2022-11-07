@@ -20,6 +20,9 @@ namespace INA_Generations
 		private TextBox PKValue;
 		private Slider PMSlider;
 		private TextBox PMValue;
+		private CheckBox EliteCheckbox;
+		private TextBox TInput;
+		private TabControl TabsControl;
 		
 		private DropDown RouletteTypeDropdown;
 		private DropDown TargetFunctionDropdown;
@@ -28,29 +31,17 @@ namespace INA_Generations
 		
 		const int inputsSeparation = 30;
 
+		private const string sliderPrecision = "0.00000000";
+		
 		public MainForm()
 		{
 			Title = "INA Generacje Hac 19755";
-			Width = 1200;
+			Width = 1220;
 			Height = 400;
-			MinimumSize = new Size(1200, 400);
+			MinimumSize = new Size(1220, 400);
 			Resizable = true;
-			var inputs = CreateInputs();
-			LOutput = new Label()
-			{
-				Text = "0"
-			};
-
-			RouletteTypeDropdown = new DropDown()
-			{
-				Items = { "Wyłączona", "Zakres (0;1)", "Koło Fortuny" },
-				SelectedIndex = 0
-			};
-			TargetFunctionDropdown = new DropDown()
-			{
-				Items = { "Maksimum", "Minimum" },
-				SelectedIndex = 0
-			};
+			StackLayout inputs = CreateInputs();
+			StackLayout secondaryInputs = CreateSecondaryInputs();
 			
 			CreateOutputTable();
 			
@@ -61,22 +52,7 @@ namespace INA_Generations
 				Items =
 				{
 					inputs,
-					new StackLayout()
-					{
-						Orientation = Orientation.Horizontal,
-						Padding = 10,
-						Items =
-						{
-							Label("L:"),
-							LOutput,
-							SeparationPanel(),
-							Label("Ruletka:"),
-							RouletteTypeDropdown,
-							SeparationPanel(),
-							Label("Funkcja Celu:"),
-							TargetFunctionDropdown
-						}
-					},
+					secondaryInputs,
 					OutputTableScrollable
 				}
 			};
@@ -96,17 +72,74 @@ namespace INA_Generations
 			};
 		}
 
+		private StackLayout CreateSecondaryInputs()
+		{
+			LOutput = new Label()
+			{
+				Text = "0"
+			};
+
+			RouletteTypeDropdown = new DropDown()
+			{
+				Items = { "Wyłączona", "Zakres (0;1)", "Koło Fortuny" },
+				SelectedIndex = 0
+			};
+			TargetFunctionDropdown = new DropDown()
+			{
+				Items = { "Maksimum", "Minimum" },
+				SelectedIndex = 0
+			};
+
+			TInput = new TextBox()
+			{
+				Text = "1"
+			};
+
+			EliteCheckbox = new CheckBox()
+			{
+				ThreeState = false,
+				Checked = false
+			};
+
+			return new StackLayout()
+			{
+				Orientation = Orientation.Horizontal,
+				AlignLabels = true,
+				VerticalContentAlignment = VerticalAlignment.Center,
+				HorizontalContentAlignment = HorizontalAlignment.Center,
+				Padding = 10,
+				Items =
+				{
+					Label("L:"),
+					LOutput,
+					SeparationPanel(),
+					Label("Ruletka:"),
+					RouletteTypeDropdown,
+					SeparationPanel(),
+					Label("Funkcja Celu:"),
+					TargetFunctionDropdown,
+					SeparationPanel(),
+					Label("T:"),
+					TInput,
+					SeparationPanel(),
+					Label("Elita:"),
+					EliteCheckbox
+				}
+			};
+		}
+
 		private void ClearOutputTable()
 		{
 			((ObservableCollection<DataRow>)OutputTable.DataStore).Clear();
 			OutputTable.Invalidate();
 		}
-
-		private DataRow CreateDataRowForSpecimen(Specimen specimen, long lp)
+		
+		private void AddDataToTable(DataRow[] data)
 		{
-			DataRow dataRow = new DataRow(specimen, lp);
-			((ObservableCollection<DataRow>)OutputTable.DataStore).Add(dataRow);
-			return dataRow;
+			for (int i = 0; i < data.Length; i++)
+			{
+				((ObservableCollection<DataRow>)(OutputTable.DataStore)).Add(data[i]);
+			}
 		}
 
 		private void CreateOutputTable()
@@ -161,15 +194,15 @@ namespace INA_Generations
 			PKSlider = new Slider()
 			{
 				MinValue = 0,
-				MaxValue = 100_000_000,
-				Value = 50_000_000,
+				MaxValue = 1_000_000_000,
+				Value = 500_000_000,
 				Width = 150,
 				ToolTip = "Prawdopodobieństwo Krzyżowania"
 			};
 			PKValue = new TextBox()
 			{
-				Text = 0.5.ToString("0.00"),
-				Width = 50,
+				Text = 0.5.ToString(sliderPrecision),
+				Width = 80,
 				ToolTip = "Prawdopodobieństwo Krzyżowania"
 			};
 
@@ -182,15 +215,15 @@ namespace INA_Generations
 						double val = double.Parse(PKValue.Text);
 						if (val > 1.0)
 						{
-							PKValue.Text = 1.0.ToString("0.00");
+							PKValue.Text = 1.0.ToString(sliderPrecision);
 							val = 1.0;
 						}
 						else if (val < 0)
 						{
-							PKValue.Text = 0.0.ToString("0.00");
+							PKValue.Text = 0.0.ToString(sliderPrecision);
 							val = 0.0;
 						}
-						PKSlider.Value = (int)Math.Round(val * 100_000_000.0);
+						PKSlider.Value = (int)Math.Round(val * (double)PKSlider.MaxValue);
 					}
 					catch (Exception e)
 					{
@@ -203,15 +236,15 @@ namespace INA_Generations
 			PMSlider = new Slider()
 			{
 				MinValue = 0,
-				MaxValue = 100_000_000,
-				Value = 2_000_000,
+				MaxValue = 1_000_000_000,
+				Value = 20_000_000,
 				Width = 150,
 				ToolTip = "Prawdopodobieństwo Mutacji pojedynczego bitu"
 			};
 			PMValue = new TextBox()
 			{
-				Text = 0.02.ToString("0.00"),
-				Width = 50,
+				Text = 0.02.ToString(sliderPrecision),
+				Width = 80,
 				ToolTip = "Prawdopodobieństwo Mutacji pojedynczego bitu"
 			};
 
@@ -224,15 +257,15 @@ namespace INA_Generations
 						double val = double.Parse(PMValue.Text);
 						if (val > 1.0)
 						{
-							PMValue.Text = 1.0.ToString("0.00");
+							PMValue.Text = 1.0.ToString(sliderPrecision);
 							val = 1.0;
 						}
 						else if (val < 0)
 						{
-							PMValue.Text = 0.0.ToString("0.00");
+							PMValue.Text = 0.0.ToString(sliderPrecision);
 							val = 0.0;
 						}
-						PMSlider.Value = (int)Math.Round(val * 100_000_000.0);
+						PMSlider.Value = (int)Math.Round(val * (double)PMSlider.MaxValue);
 					}
 					catch (Exception e)
 					{
@@ -315,13 +348,13 @@ namespace INA_Generations
 		private void SyncPKValueToSlider()
 		{
 			double val = PKSlider.Value;
-			PKValue.Text = (val / 100_000_000.0).ToString("0.00");
+			PKValue.Text = (val / (double)PKSlider.MaxValue).ToString(sliderPrecision);
 		}
 		
 		private void SyncPMValueToSlider()
 		{
 			double val = PMSlider.Value;
-			PMValue.Text = (val / 100_000_000.0).ToString("0.00");
+			PMValue.Text = (val / (double)PMSlider.MaxValue).ToString(sliderPrecision);
 		}
 	}
 }
