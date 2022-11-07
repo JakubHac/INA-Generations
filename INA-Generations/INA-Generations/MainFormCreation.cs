@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Reflection;
 using Eto.Drawing;
 using Eto.Forms;
@@ -21,6 +23,7 @@ namespace INA_Generations
 		private Slider PMSlider;
 		private TextBox PMValue;
 		private CheckBox EliteCheckbox;
+		private CheckBox BenchmarkCheckbox;
 		private TextBox TInput;
 		private TabControl TabsControl;
 		
@@ -100,6 +103,12 @@ namespace INA_Generations
 				ThreeState = false,
 				Checked = false
 			};
+			
+			BenchmarkCheckbox = new CheckBox()
+			{
+				ThreeState = false,
+				Checked = false
+			};
 
 			return new StackLayout()
 			{
@@ -123,7 +132,10 @@ namespace INA_Generations
 					TInput,
 					SeparationPanel(),
 					Label("Elita:"),
-					EliteCheckbox
+					EliteCheckbox,
+					SeparationPanel(),
+					Label("Benchmark:"),
+					BenchmarkCheckbox
 				}
 			};
 		}
@@ -131,14 +143,13 @@ namespace INA_Generations
 		private void ClearOutputTable()
 		{
 			((ObservableCollection<DataRow>)OutputTable.DataStore).Clear();
-			OutputTable.Invalidate();
 		}
 		
 		private void AddDataToTable(DataRow[] data)
 		{
-			for (int i = 0; i < data.Length; i++)
+			foreach (var dataRow in data)
 			{
-				((ObservableCollection<DataRow>)(OutputTable.DataStore)).Add(data[i]);
+				((ObservableCollection<DataRow>)OutputTable.DataStore).Add(dataRow);
 			}
 		}
 
@@ -281,8 +292,6 @@ namespace INA_Generations
 				Command = new Command((sender, args) => ExecuteGeneration())
 			};
 			
-			
-
 			var inputs = new StackLayout()
 			{
 				Orientation = Orientation.Horizontal,

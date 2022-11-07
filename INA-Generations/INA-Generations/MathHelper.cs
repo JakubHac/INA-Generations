@@ -1,4 +1,5 @@
 ﻿using System;
+using Eto.Forms;
 
 namespace INA_Generations
 {
@@ -59,6 +60,61 @@ namespace INA_Generations
 		public static string XIntToXBin(long xInt)
 		{
 			return Convert.ToString(xInt, 2).PadLeft(Singleton.l, '0');
+		}
+		
+		public static long BinarySearchForQ(DataRow[] data, double selection) {
+			long minNum = 0;
+			long maxNum = data.Length - 1;
+
+			if (maxNum == 0)
+			{
+				return maxNum;
+			}
+			
+			if (data[minNum].QxValue >= selection)
+			{
+				return 0;
+			}
+			
+			if (data[maxNum].QxValue <= selection)
+			{
+				return maxNum;
+			}
+
+			if (data[maxNum].QxValue >= selection && data[maxNum - 1].QxValue <= selection)
+			{
+				return maxNum;
+			}
+
+			long iter = 0;
+
+			while (minNum <= maxNum) {
+				long mid = (minNum + maxNum) / 2;
+				if (minNum == maxNum)
+				{
+					return mid;
+				}
+				if (data[mid].QxValue >= selection)
+				{
+					if (data[mid - 1].QxValue <= selection)
+					{
+						return mid;
+					}
+
+					maxNum = mid;
+				}
+				else
+				{
+					minNum = mid;
+				}
+
+				iter++;
+				if (iter > data.Length)
+				{
+					return -1;
+				}
+			}
+			return 0;
 		}
 	}
 }

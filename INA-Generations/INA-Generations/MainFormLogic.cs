@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Linq;
+using System.Threading.Tasks;
 using Eto.Forms;
 
 namespace INA_Generations
@@ -61,28 +63,71 @@ namespace INA_Generations
 				"Minimum" => TargetFunction.Min
 			};
 
-
+			bool addDataAtStart = Singleton.RandomRoulette != RouletteType.Disabled;
+			
 			LOutput.Text = l.ToString();
 			ClearOutputTable();
 			DataRow[] data = new DataRow[n];
 			CreateInitialData(data, n);
-			AddDataToTable(data);
+			
+			if (addDataAtStart)
+			{
+				AddDataToTable(data);
+			}
+			
+			Stopwatch benchmark = Stopwatch.StartNew();
+			List<(string,long)> benchmarks = new List<(string, long)>();
+
 			for (int i = 0; i < t; i++)
 			{
 				CalculateGx(data);
+				benchmarks.Add(("Gx", benchmark.ElapsedMilliseconds));
+				benchmark.Restart();
 				CalculatePx(data);
+				benchmarks.Add(("Px", benchmark.ElapsedMilliseconds));
+				benchmark.Restart();
 				CalculateQx(data);
+				benchmarks.Add(("Qx", benchmark.ElapsedMilliseconds));
+				benchmark.Restart();
 				Selection(data);
+				benchmarks.Add(("Selection", benchmark.ElapsedMilliseconds));
+				benchmark.Restart();
 				Parenting(data);
+				benchmarks.Add(("Parenting", benchmark.ElapsedMilliseconds));
+				benchmark.Restart();
 				PairParents(data);
+				benchmarks.Add(("Pairing", benchmark.ElapsedMilliseconds));
+				benchmark.Restart();
 				RandomizePC(data);
+				benchmarks.Add(("Pc", benchmark.ElapsedMilliseconds));
+				benchmark.Restart();
 				Fuck(data);
+				benchmarks.Add(("Fucking", benchmark.ElapsedMilliseconds));
+				benchmark.Restart();
 				Mutate(data);
+				benchmarks.Add(("Mutating", benchmark.ElapsedMilliseconds));
+				benchmark.Restart();
 				Finalize(data);
+				benchmarks.Add(("Finalization", benchmark.ElapsedMilliseconds));
+				benchmark.Restart();
 				if (i + 1 < t)
 				{
 					MoveDataToNextGeneration(data, elite);
+					benchmarks.Add(("Moving Data", benchmark.ElapsedMilliseconds));
+					benchmark.Restart();
 				}
+			}
+
+			if (!addDataAtStart)
+			{
+				AddDataToTable(data);
+				benchmarks.Add(("Display", benchmark.ElapsedMilliseconds));
+				benchmark.Stop();
+			}
+
+			if (BenchmarkCheckbox.Checked.Value)
+			{
+				MessageBox.Show(benchmarks.Aggregate($"All: {benchmarks.Sum(x => x.Item2)}[ms]", (s, tuple) => $"{s}\n{tuple.Item1}: {tuple.Item2}[ms]"),"Benchmark", MessageBoxType.Information);
 			}
 		}
 
@@ -137,46 +182,39 @@ namespace INA_Generations
 
 		private void Finalize(DataRow[] data)
 		{
-			foreach (var row in data)
+			Parallel.ForEach(data, row =>
 			{
 				row.FinalXRealValue = MathHelper.XBinToXReal(row.MutatedChromosomeValue);
 				row.FinalFxRealValue = MathHelper.Fx(row.FinalXRealValue);
-			}
+			});
 		}
 
 		private void Mutate(DataRow[] data)
 		{
-			foreach (var dataRow in data)
+			Parallel.ForEach(data, dataRow =>
 			{
 				dataRow.MutatedGenesValue = new SortedSet<int>();
+				char[] chromosome = dataRow.AfterChild.Item2.ToCharArray();
 				for (int j = 0; j < Singleton.l; j++)
 				{
 					if (Singleton.Random.NextDouble() < Singleton.PM)
 					{
 						dataRow.MutatedGenesValue.Add(j);
+						chromosome[j] = chromosome[j] == '0' ? '1' : '0';
 					}
 				}
-
-				dataRow.MutatedChromosomeValue = dataRow.AfterChild.Item2.Select((x, index) =>
-				{
-					if (dataRow.MutatedGenesValue.Contains(index))
-					{
-						return x == '0' ? '1' : '0';
-					}
-
-					return x;
-				}).Aggregate("", (s, c) => $"{s}{c}");
-			}
+				dataRow.MutatedChromosomeValue = new string(chromosome);
+			});
 		}
 
 		private void Fuck(DataRow[] data)
 		{
-			foreach (var dataRow in data)
+			Parallel.ForEach(data, dataRow =>
 			{
-				if (dataRow.ParentsWith == null) continue;
+				if (dataRow.ParentsWith == null) return;
 				dataRow.ChildXBin =
 					$"{dataRow.FirstParentXBin.Item2.Substring(0, dataRow.PCValue.Value)} | {dataRow.SecondParentXBin.Item2.Substring(dataRow.PCValue.Value)}";
-			}
+			});
 		}
 
 		private void RandomizePC(DataRow[] data)
@@ -238,22 +276,61 @@ namespace INA_Generations
 
 		private void Parenting(DataRow[] data)
 		{
-			foreach (var row in data)
+			switch (Singleton.RandomRoulette)
 			{
-				row.RandomizeParenting();
-				OutputTable.Invalidate();
+				case RouletteType.Disabled:
+					Parallel.ForEach(data, row =>
+					{
+						row.RandomizeParenting();
+					});
+					break;
+				case RouletteType.Gradient:
+					foreach (var row in data)
+					{
+						row.RandomizeParenting();
+						OutputTable.Invalidate();
+					}
+					break;
+				case RouletteType.PieChart:
+					foreach (var row in data)
+					{
+						row.RandomizeParenting();
+						OutputTable.Invalidate();
+					}
+					break;
+				default:
+					throw new ArgumentOutOfRangeException();
 			}
+			
 		}
 
 		private void Selection(DataRow[] data)
 		{
-			List<(Specimen OriginalSpecimen, string xBin_xInt, double Px)> chances = data.Select(x => (x.OriginalSpecimen, x.OriginalSpecimen.xBin_xInt, x.PxValue)).ToList();
-			foreach (var row in data)
+			switch (Singleton.RandomRoulette)
 			{
-				switch (Singleton.RandomRoulette)
-				{
-					case RouletteType.Disabled:
-					case RouletteType.Gradient:
+				case RouletteType.Disabled:
+					Parallel.ForEach(data, row =>
+					{
+						try
+						{
+							row.RandomizeSelection(true);
+							long selectedIndex = MathHelper.BinarySearchForQ(data, row.SelectionRandom);
+							if (selectedIndex == -1)
+							{
+								MessageBox.Show($"Iter Limit Reached for {row.SelectionRandom}");
+								selectedIndex = 0;
+							}
+							row.SelectionValue = data[selectedIndex].OriginalSpecimen;
+						}
+						catch (Exception e)
+						{
+							MessageBox.Show(e.ToString());
+						}
+					});
+					break;
+				case RouletteType.Gradient:
+					foreach (var row in data)
+					{
 						row.RandomizeSelection();
 						int selectedIndex = data.Length - 1;
 						for (int i = 0; i < data.Length; i++)
@@ -266,15 +343,21 @@ namespace INA_Generations
 						}
 
 						row.SelectionValue = data[selectedIndex].OriginalSpecimen;
-						break;
-					case RouletteType.PieChart:
+						OutputTable.Invalidate();
+					}
+					break;
+				case RouletteType.PieChart:
+					List<(Specimen OriginalSpecimen, string xBin_xInt, double Px)> chances = data.Select(x => (x.OriginalSpecimen, x.OriginalSpecimen.xBin_xInt, x.PxValue)).ToList();
+					foreach (var row in data)
+					{
 						var result = Singleton.GetRandomWithRoulette(chances);
 						row.SelectionRandom = result.r;
 						row.SelectionValue = result.result;
-						break;
-				}
-				
-				OutputTable.Invalidate();
+						OutputTable.Invalidate();
+					}
+					break;
+				default:
+					throw new ArgumentOutOfRangeException();
 			}
 		}
 
@@ -291,10 +374,10 @@ namespace INA_Generations
 		private void CalculatePx(DataRow[] data)
 		{
 			double sum = data.Sum(x => x.GxValue);
-			foreach (var dataRow in data)
+			Parallel.ForEach(data, dataRow =>
 			{
 				dataRow.PxValue = dataRow.GxValue / sum;
-			}
+			});
 		}
 
 		private static void CalculateGx(DataRow[] data)
@@ -303,18 +386,17 @@ namespace INA_Generations
 			{
 				case INA_Generations.TargetFunction.Max:
 					double min = data.Min(x => x.OriginalSpecimen.FxReal);
-					foreach (var dataRow in data)
+					Parallel.ForEach(data, dataRow =>
 					{
 						dataRow.GxValue = dataRow.OriginalSpecimen.FxReal - min + Singleton.d;
-					}
-
+					});
 					break;
 				case INA_Generations.TargetFunction.Min:
 					double max = data.Max(x => x.OriginalSpecimen.FxReal);
-					foreach (var dataRow in data)
+					Parallel.ForEach(data, dataRow =>
 					{
 						dataRow.GxValue = -(dataRow.OriginalSpecimen.FxReal - max) + Singleton.d;
-					}
+					});
 
 					break;
 				default:

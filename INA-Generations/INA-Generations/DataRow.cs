@@ -20,9 +20,9 @@ namespace INA_Generations
 			Index = index;
 		}
 
-		public void RandomizeSelection()
+		public void RandomizeSelection(bool skipRoulette = false)
 		{
-			SelectionRandom = Singleton.GetRandomWithRoulette();
+			SelectionRandom = skipRoulette ? Singleton.Random.NextDouble() : Singleton.GetRandomWithRoulette();
 		}
 		
 		public void RandomizeParenting()
@@ -30,6 +30,8 @@ namespace INA_Generations
 			switch (Singleton.RandomRoulette)
 			{
 				case RouletteType.Disabled:
+					ParentRandom = Singleton.Random.NextDouble();
+					break;
 				case RouletteType.Gradient:
 					ParentRandom = Singleton.GetRandomWithRoulette();
 					break;
