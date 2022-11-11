@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using Eto.Drawing;
 using Eto.Forms;
+using ScottPlot.Eto;
 
 namespace INA_Generations
 {
@@ -26,7 +27,12 @@ namespace INA_Generations
 		private CheckBox BenchmarkCheckbox;
 		private TextBox TInput;
 		private TabControl TabsControl;
-		
+		private TabPage FirstPage;
+		private TabPage SecondPage;
+		private PlotView Plot;
+		private StackLayout Inputs;
+		private StackLayout SecondaryInputs;
+
 		private DropDown RouletteTypeDropdown;
 		private DropDown TargetFunctionDropdown;
 		
@@ -39,14 +45,57 @@ namespace INA_Generations
 		public MainForm()
 		{
 			Title = "INA Generacje Hac 19755";
-			Width = 1220;
+			Width = 1260;
 			Height = 400;
 			MinimumSize = new Size(1220, 400);
 			Resizable = true;
-			StackLayout inputs = CreateInputs();
-			StackLayout secondaryInputs = CreateSecondaryInputs();
-			
+			Inputs = CreateInputs();
+			SecondaryInputs = CreateSecondaryInputs();
 			CreateOutputTable();
+			Plot = new PlotView();
+			Plot.Width = 600;
+			Plot.Height = 400;
+
+			FirstPage = new TabPage()
+			{
+				Content = new StackLayout()
+				{
+					Orientation = Orientation.Vertical,
+					Padding = 10,
+					Items =
+					{
+						Inputs,
+						SecondaryInputs,
+						OutputTableScrollable
+					}
+				},
+				Text = "Wyniki"
+			};
+			SecondPage = new TabPage()
+			{
+				Content = new StackLayout()
+				{
+					Orientation = Orientation.Vertical,
+					Padding = 10,
+					Items =
+					{
+						Plot
+					}
+				},
+				Text = "Wykres"
+			};
+
+			
+			
+			TabsControl = new TabControl()
+			{
+				Pages =
+				{
+					FirstPage, SecondPage
+				}
+			};
+			
+			TabsControl.SelectedIndexChanged += TabsControlOnSelectedIndexChanged;
 			
 			Content = new StackLayout
 			{
@@ -54,9 +103,7 @@ namespace INA_Generations
 				Padding = 10,
 				Items =
 				{
-					inputs,
-					secondaryInputs,
-					OutputTableScrollable
+					TabsControl
 				}
 			};
 			
@@ -64,15 +111,61 @@ namespace INA_Generations
 			{
 				if (OutputTable != null)
 				{
-					OutputTable.Width = Width - 42;
+					OutputTable.Width = Width - 40 - 30 - 30;
+				}
+				
+				if (Plot != null)
+				{
+					Plot.Width = Width - 40 - 30 - 30;
+					Plot.Height = Height - 200;
 				}
 
 				if (OutputTableScrollable != null)
 				{
-					OutputTableScrollable.Width = Width - 40;
-					OutputTableScrollable.Height = Height - 180;
+					OutputTableScrollable.Width = Width - 40 - 30;
+					OutputTableScrollable.Height = Height - 180 - 20;
+				}
+
+				if (TabsControl != null)
+				{
+					TabsControl.Width = Width - 40;
+					TabsControl.Height = Height - 60;
 				}
 			};
+		}
+
+		private void TabsControlOnSelectedIndexChanged(object sender, EventArgs e)
+		{
+			switch (TabsControl.SelectedIndex)
+			{
+				case 0:
+					FirstPage.Content = new StackLayout()
+					{
+						Orientation = Orientation.Vertical,
+						Padding = 10,
+						Items =
+						{
+							Inputs,
+							SecondaryInputs,
+							OutputTableScrollable
+						}
+					};
+					break;
+				case 1:
+					SecondPage.Content = new StackLayout()
+					{
+						Orientation = Orientation.Vertical,
+						Padding = 10,
+						Items =
+						{
+							Inputs,
+							SecondaryInputs,
+							Plot
+						}
+					};
+					break;
+			}
+			//TabsControl.Invalidate();
 		}
 
 		private StackLayout CreateSecondaryInputs()
@@ -95,13 +188,13 @@ namespace INA_Generations
 
 			TInput = new TextBox()
 			{
-				Text = "1"
+				Text = "50"
 			};
 
 			EliteCheckbox = new CheckBox()
 			{
 				ThreeState = false,
-				Checked = false
+				Checked = true
 			};
 			
 			BenchmarkCheckbox = new CheckBox()
@@ -197,19 +290,19 @@ namespace INA_Generations
 			};
 			NInput = new TextBox()
 			{
-				Text = "10"
+				Text = "60"
 			};
 			PKSlider = new Slider()
 			{
 				MinValue = 0,
 				MaxValue = 1_000_000_000,
-				Value = 500_000_000,
+				Value = (int)(1_000_000_000.0 * 0.8),
 				Width = 150,
 				ToolTip = "Prawdopodobieństwo Krzyżowania"
 			};
 			PKValue = new TextBox()
 			{
-				Text = 0.5.ToString(sliderPrecision),
+				Text = 0.8.ToString(sliderPrecision),
 				Width = 80,
 				ToolTip = "Prawdopodobieństwo Krzyżowania"
 			};
@@ -245,13 +338,13 @@ namespace INA_Generations
 			{
 				MinValue = 0,
 				MaxValue = 1_000_000_000,
-				Value = 20_000_000,
+				Value = (int)(1_000_000_000.0 * 0.005),
 				Width = 150,
 				ToolTip = "Prawdopodobieństwo Mutacji pojedynczego bitu"
 			};
 			PMValue = new TextBox()
 			{
-				Text = 0.02.ToString(sliderPrecision),
+				Text = 0.005.ToString(sliderPrecision),
 				Width = 80,
 				ToolTip = "Prawdopodobieństwo Mutacji pojedynczego bitu"
 			};

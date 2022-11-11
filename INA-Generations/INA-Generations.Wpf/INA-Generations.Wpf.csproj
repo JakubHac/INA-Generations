@@ -12,6 +12,7 @@
 
     <ItemGroup>
         <PackageReference Include="Eto.Platform.Wpf" Version="2.7.1" />
+        <PackageReference Include="ScottPlot.Eto" Version="4.1.59" />
     </ItemGroup>
 
 </Project>

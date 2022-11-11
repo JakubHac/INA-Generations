@@ -8,6 +8,7 @@
 
     <ItemGroup>
         <PackageReference Include="Eto.Forms" Version="2.7.1" />
+        <PackageReference Include="ScottPlot.Eto" Version="4.1.59" />
     </ItemGroup>
 
 </Project>

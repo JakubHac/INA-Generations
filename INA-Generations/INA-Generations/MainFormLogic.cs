@@ -2,9 +2,14 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
+using Eto.Drawing;
 using Eto.Forms;
+using ScottPlot.Eto;
+using ScottPlot.Plottable;
+using Color = System.Drawing.Color;
 
 namespace INA_Generations
 {
@@ -69,19 +74,52 @@ namespace INA_Generations
 			ClearOutputTable();
 			DataRow[] data = new DataRow[n];
 			CreateInitialData(data, n);
+			List<double> MinFx = new List<double>();
+			List<double> MaxFx = new List<double>();
+			List<double> AvgFx = new List<double>();
+			Plot.Reset();
+			SignalPlot MinGxPlot = new SignalPlot();
+			MinGxPlot.Color = Color.Red;
+			MinGxPlot.FillBelow(Color.Crimson, 1f);
+			MinGxPlot.SampleRate = 1;
+			MinGxPlot.MinRenderIndex = 0;
+			SignalPlot AvgGxPlot = new SignalPlot();
+			AvgGxPlot.Color = Color.DodgerBlue;
+			AvgGxPlot.FillBelow(Color.Turquoise, 1f);
+			AvgGxPlot.SampleRate = 1;
+			AvgGxPlot.MinRenderIndex = 0;
+			SignalPlot MaxGxPlot = new SignalPlot();
+			MaxGxPlot.Color = Color.LawnGreen;
+			MaxGxPlot.FillBelow(Color.Lime, 1f);
+			MaxGxPlot.SampleRate = 1;
+			MaxGxPlot.MinRenderIndex = 0;
 			
+			Plot.Plot.Add(MaxGxPlot);
+			Plot.Plot.Add(AvgGxPlot);
+			Plot.Plot.Add(MinGxPlot);
+
 			if (addDataAtStart)
 			{
 				AddDataToTable(data);
 			}
 
 			bool isBenchmarkRun = BenchmarkCheckbox.Checked.Value && t == 1;
-			Stopwatch benchmark =isBenchmarkRun ? Stopwatch.StartNew() : null;
+			Stopwatch benchmark = isBenchmarkRun ? Stopwatch.StartNew() : null;
 			List<(string,long)> benchmarks = new List<(string, long)>();
 
 			for (int i = 0; i < t; i++)
 			{
 				CalculateGx(data);
+				MinFx.Add(data.Min(x => x.OriginalSpecimen.FxReal));
+				MaxFx.Add(data.Max(x => x.OriginalSpecimen.FxReal));
+				AvgFx.Add(data.Average(x => x.OriginalSpecimen.FxReal));
+				MinGxPlot.Ys = MinFx.ToArray();
+				MinGxPlot.MaxRenderIndex = MinGxPlot.PointCount - 1;
+				MaxGxPlot.Ys = MaxFx.ToArray();
+				MaxGxPlot.MaxRenderIndex = MaxGxPlot.PointCount - 1;
+				AvgGxPlot.Ys = AvgFx.ToArray();
+				AvgGxPlot.MaxRenderIndex = AvgGxPlot.PointCount - 1;
+
 				if (isBenchmarkRun)
 				{
 					benchmarks.Add(("Gx", benchmark.ElapsedMilliseconds));
@@ -164,6 +202,10 @@ namespace INA_Generations
 					benchmark.Stop();
 				}
 			}
+			
+			Plot.Plot.AxisAuto(0.05f,0.1f);
+			Plot.Refresh();
+			//MessageBox.Show($"Avg count: {AvgFx.Count} - {AvgGxPlot.Ys.Length}");
 
 			if (isBenchmarkRun && BenchmarkCheckbox.Checked.Value)
 			{
@@ -247,6 +289,7 @@ namespace INA_Generations
 			});
 		}
 
+		[SuppressMessage("ReSharper.DPA", "DPA0001: Memory allocation issues")]
 		private void Fuck(DataRow[] data)
 		{
 			Parallel.ForEach(data, dataRow =>

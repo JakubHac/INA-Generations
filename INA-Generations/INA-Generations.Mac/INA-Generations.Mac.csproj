@@ -9,11 +9,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\INA-Generations\INA-Generations.csproj"/>
+        <ProjectReference Include="..\INA-Generations\INA-Generations.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Eto.Platform.Mac64" Version="2.7.1"/>
+        <PackageReference Include="Eto.Platform.Mac64" Version="2.7.1" />
+        <PackageReference Include="ScottPlot.Eto" Version="4.1.59" />
     </ItemGroup>
 
 </Project>
