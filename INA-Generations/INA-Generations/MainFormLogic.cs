@@ -1,20 +1,170 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
-using Eto.Drawing;
 using Eto.Forms;
-using ScottPlot.Eto;
 using ScottPlot.Plottable;
-using Color = System.Drawing.Color;
 
 namespace INA_Generations
 {
 	public partial class MainForm
 	{
+		private void StartAnalysis()
+		{
+			if (!(ParseHelper.ParseDouble(Analysis_AInput.Text, "A", out double a) &&
+			      ParseHelper.ParseDouble(Analysis_BInput.Text, "B", out double b) &&
+			      ParseHelper.ParseDouble(Analysis_DInput.SelectedKey, "D", out double d, "en-US") &&
+			      ParseHelper.ParseLong(Analysis_IterInput.Text, "Iter", out long iters)
+			    ))
+			{
+				return;
+			}
+
+			long[] Ns = Array.Empty<long>();
+			try
+			{
+				Ns = Analysis_NInput.Text.Split(';').Where(x => x.Trim().Length > 0).Select(x =>
+				{
+					ParseHelper.ParseLong(x, "N", out long n);
+					return n;
+				}).ToArray();
+			}
+			catch (Exception e)
+			{
+				MessageBox.Show(
+					$"Błąd przy interpretacji N, powinny być wartości rozdzielane ; np. {10} ; {20} ; {30}");
+				return;
+			}
+
+			long[] Ts = Array.Empty<long>();
+			try
+			{
+				Ts = Analysis_TInput.Text.Split(';').Where(x => x.Trim().Length > 0).Select(x =>
+				{
+					ParseHelper.ParseLong(x, "T", out long n);
+					return n;
+				}).ToArray();
+			}
+			catch (Exception e)
+			{
+				MessageBox.Show(
+					$"Błąd przy interpretacji T, powinny być wartości rozdzielane ; np. {10} ; {20} ; {30}");
+				return;
+			}
+
+			double[] PKs = Array.Empty<double>();
+			try
+			{
+				PKs = Analysis_PKValue.Text.Split(';').Where(x => x.Trim().Length > 0).Select(x =>
+				{
+					ParseHelper.ParseDouble(x, "PK", out double pk);
+					return pk;
+				}).ToArray();
+			}
+			catch (Exception e)
+			{
+				MessageBox.Show($"Błąd przy interpretacji PK, powinny być wartości rozdzielane ; np. {0.8} ; {0.5}");
+				return;
+			}
+
+			double[] PMs = Array.Empty<double>();
+			try
+			{
+				PMs = Analysis_PMValue.Text.Split(';').Where(x => x.Trim().Length > 0).Select(x =>
+				{
+					ParseHelper.ParseDouble(x, "PM", out double pm);
+					return pm;
+				}).ToArray();
+			}
+			catch (Exception e)
+			{
+				MessageBox.Show($"Błąd przy interpretacji PM, powinny być wartości rozdzielane ; np. {0.1} ; {0.01}");
+				return;
+			}
+
+			Singleton.RandomRoulette = RouletteType.Disabled;
+			Singleton.TargetFunction = TargetFunctionDropdown.SelectedKey switch
+			{
+				"Maksimum" => TargetFunction.Max,
+				"Minimum" => TargetFunction.Min
+			};
+			
+			List<AnalysisDataRow> analysisDataRows = new List<AnalysisDataRow>();
+
+			bool elite = Analysis_EliteCheckbox.Checked.Value;
+			Singleton.d = d;
+			Singleton.a = a;
+			Singleton.b = b;
+			int l = (int)Math.Floor(Math.Log((b - a) / d, 2) + 1.0);
+			Singleton.l = l;
+			
+			ClearAnalysisOutputTable();
+			
+			for (long n = 0; n < Ns.Length; n++)
+			{
+				for (long t = 0; t < Ts.Length; t++)
+				{
+					for (long pk = 0; pk < PKs.Length; pk++)
+					{
+						Singleton.PK = PKs[pk];
+						for (long pm = 0; pm < PMs.Length; pm++)
+						{
+							Singleton.PM = PMs[pm];
+							List<double> FXs = new List<double>();
+							for (long i = 0; i < iters; i++)
+							{
+								DataRow[] data = new DataRow[Ns[n]];
+								CreateInitialData(data, Ns[n]);
+								
+								for (int j = 0; j < Ts[t]; j++)
+								{
+									CalculateGx(data);
+									CalculatePx(data);
+									CalculateQx(data);
+									Selection(data);
+									Parenting(data);
+									PairParents(data);
+									RandomizePC(data);
+									Fuck(data);
+									Mutate(data);
+									Finalize(data);
+
+									if (j + 1 < Ts[t])
+									{
+										MoveDataToNextGeneration(data, elite);
+									}
+								}
+								
+								FXs.Add(data.Max(x => x.FinalFxRealValue));
+							}
+							analysisDataRows.Add(new AnalysisDataRow()
+							{
+								NValue = Ns[n],
+								TValue = Ts[t],
+								PKValue = PKs[pk],
+								PMValue = PMs[pm],
+								AvgFXValue = FXs.Average()
+							});
+						}
+					}
+				}
+			}
+
+			if (Singleton.TargetFunction == TargetFunction.Max)
+			{
+				analysisDataRows = analysisDataRows.OrderByDescending(x => x.AvgFXValue).ThenBy(x => x.NValue * x.TValue).ToList();
+			}
+			else
+			{
+				analysisDataRows = analysisDataRows.OrderBy(x => x.AvgFXValue).ThenBy(x => x.NValue * x.TValue).ToList();
+			}
+			
+			AddAnalysisDataToTable(analysisDataRows);
+		}
+
 		private void ExecuteGeneration()
 		{
 			if (!(
@@ -64,19 +214,23 @@ namespace INA_Generations
 
 			Singleton.TargetFunction = TargetFunctionDropdown.SelectedKey switch
 			{
-				"Maksimum" => TargetFunction.Max, 
+				"Maksimum" => TargetFunction.Max,
 				"Minimum" => TargetFunction.Min
 			};
 
 			bool addDataAtStart = Singleton.RandomRoulette != RouletteType.Disabled;
-			
+
 			LOutput.Text = l.ToString();
 			ClearOutputTable();
+			ClearGroupOutputTable();
 			DataRow[] data = new DataRow[n];
 			CreateInitialData(data, n);
 			List<double> MinFx = new List<double>();
 			List<double> MaxFx = new List<double>();
 			List<double> AvgFx = new List<double>();
+			MinFx.Add(data.Min(x => x.OriginalSpecimen.FxReal));
+			MaxFx.Add(data.Max(x => x.OriginalSpecimen.FxReal));
+			AvgFx.Add(data.Average(x => x.OriginalSpecimen.FxReal));
 			Plot.Reset();
 			SignalPlot MinGxPlot = new SignalPlot();
 			MinGxPlot.Color = Color.Red;
@@ -93,7 +247,7 @@ namespace INA_Generations
 			MaxGxPlot.FillBelow(Color.Lime, 1f);
 			MaxGxPlot.SampleRate = 1;
 			MaxGxPlot.MinRenderIndex = 0;
-			
+
 			Plot.Plot.Add(MaxGxPlot);
 			Plot.Plot.Add(AvgGxPlot);
 			Plot.Plot.Add(MinGxPlot);
@@ -105,32 +259,24 @@ namespace INA_Generations
 
 			bool isBenchmarkRun = BenchmarkCheckbox.Checked.Value && t == 1;
 			Stopwatch benchmark = isBenchmarkRun ? Stopwatch.StartNew() : null;
-			List<(string,long)> benchmarks = new List<(string, long)>();
+			List<(string, long)> benchmarks = new List<(string, long)>();
 
 			for (int i = 0; i < t; i++)
 			{
 				CalculateGx(data);
-				MinFx.Add(data.Min(x => x.OriginalSpecimen.FxReal));
-				MaxFx.Add(data.Max(x => x.OriginalSpecimen.FxReal));
-				AvgFx.Add(data.Average(x => x.OriginalSpecimen.FxReal));
-				MinGxPlot.Ys = MinFx.ToArray();
-				MinGxPlot.MaxRenderIndex = MinGxPlot.PointCount - 1;
-				MaxGxPlot.Ys = MaxFx.ToArray();
-				MaxGxPlot.MaxRenderIndex = MaxGxPlot.PointCount - 1;
-				AvgGxPlot.Ys = AvgFx.ToArray();
-				AvgGxPlot.MaxRenderIndex = AvgGxPlot.PointCount - 1;
-
 				if (isBenchmarkRun)
 				{
 					benchmarks.Add(("Gx", benchmark.ElapsedMilliseconds));
 					benchmark.Restart();
 				}
+
 				CalculatePx(data);
 				if (isBenchmarkRun)
 				{
 					benchmarks.Add(("Px", benchmark.ElapsedMilliseconds));
 					benchmark.Restart();
 				}
+
 				CalculateQx(data);
 				if (isBenchmarkRun)
 				{
@@ -187,6 +333,10 @@ namespace INA_Generations
 					benchmark.Restart();
 				}
 
+				MinFx.Add(data.Min(x => x.FinalFxRealValue));
+				MaxFx.Add(data.Max(x => x.FinalFxRealValue));
+				AvgFx.Add(data.Average(x => x.FinalFxRealValue));
+
 				if (i + 1 < t)
 				{
 					MoveDataToNextGeneration(data, elite);
@@ -202,15 +352,67 @@ namespace INA_Generations
 					benchmark.Stop();
 				}
 			}
-			
-			Plot.Plot.AxisAuto(0.05f,0.1f);
+
+			GroupData(data);
+
+			MinGxPlot.Ys = MinFx.ToArray();
+			MinGxPlot.MaxRenderIndex = MinGxPlot.PointCount - 1;
+			MaxGxPlot.Ys = MaxFx.ToArray();
+			MaxGxPlot.MaxRenderIndex = MaxGxPlot.PointCount - 1;
+			AvgGxPlot.Ys = AvgFx.ToArray();
+			AvgGxPlot.MaxRenderIndex = AvgGxPlot.PointCount - 1;
+
+			Plot.Plot.AxisAuto(0.05f, 0.1f);
 			Plot.Refresh();
 			//MessageBox.Show($"Avg count: {AvgFx.Count} - {AvgGxPlot.Ys.Length}");
 
 			if (isBenchmarkRun && BenchmarkCheckbox.Checked.Value)
 			{
-				MessageBox.Show(benchmarks.Aggregate($"All: {benchmarks.Sum(x => x.Item2)}[ms]", (s, tuple) => $"{s}\n{tuple.Item1}: {tuple.Item2}[ms]"),"Benchmark", MessageBoxType.Information);
+				MessageBox.Show(
+					benchmarks.Aggregate($"All: {benchmarks.Sum(x => x.Item2)}[ms]",
+						(s, tuple) => $"{s}\n{tuple.Item1}: {tuple.Item2}[ms]"), "Benchmark",
+					MessageBoxType.Information);
 			}
+		}
+
+		private void GroupData(DataRow[] data)
+		{
+			Dictionary<double, long> XRealCounts = new Dictionary<double, long>();
+			foreach (var dataRow in data)
+			{
+				if (XRealCounts.ContainsKey(dataRow.FinalXRealValue))
+				{
+					XRealCounts[dataRow.FinalXRealValue]++;
+				}
+				else
+				{
+					XRealCounts.Add(dataRow.FinalXRealValue, 1);
+				}
+			}
+
+
+			var xRealPercentPair =
+				XRealCounts.Select(x => (x.Key, (((double)x.Value) * 100.0) / ((double)data.Length)));
+
+			List<(double xReal, double percent)> groupsData = null;
+
+			if (Singleton.TargetFunction == TargetFunction.Max)
+			{
+				groupsData = xRealPercentPair.OrderByDescending(x => MathHelper.Fx(x.Key)).ToList();
+			}
+			else
+			{
+				groupsData = xRealPercentPair.OrderBy(x => MathHelper.Fx(x.Key)).ToList();
+			}
+
+			GroupDataRow[] Groups = new GroupDataRow[groupsData.Count];
+
+			for (int i = 0; i < groupsData.Count; i++)
+			{
+				Groups[i] = new GroupDataRow(i + 1, groupsData[i].xReal, groupsData[i].percent);
+			}
+
+			AddGroupDataToTable(Groups);
 		}
 
 		private void CreateInitialData(DataRow[] data, long n)
@@ -251,6 +453,7 @@ namespace INA_Generations
 						eliteMadeIt = true;
 					}
 				}
+
 				data[i] = new DataRow(new Specimen(finalXReal), temp.Index);
 			}
 
@@ -285,6 +488,7 @@ namespace INA_Generations
 						chromosome[j] = chromosome[j] == '0' ? '1' : '0';
 					}
 				}
+
 				dataRow.MutatedChromosomeValue = new string(chromosome);
 			});
 		}
@@ -305,7 +509,7 @@ namespace INA_Generations
 			foreach (var dataRow in data)
 			{
 				if (dataRow.ParentsWith == null || dataRow.PCValue != null) continue;
-				
+
 				switch (Singleton.RandomRoulette)
 				{
 					case RouletteType.Disabled:
@@ -320,10 +524,11 @@ namespace INA_Generations
 						for (int j = 1; j < Singleton.l; j++)
 						{
 							possiblePC.Add((
-								j, 
+								j,
 								$"{dataRow.FirstParentXBin.Item2.Substring(0, j)} | {dataRow.SecondParentXBin.Item2.Substring(j)}"
 								, 1f / ((float)Singleton.l - 1f)));
 						}
+
 						var result = Singleton.GetRandomWithRoulette(possiblePC);
 						dataRow.PCValue = result.result;
 						dataRow.ParentsWith.PCValue = result.result;
@@ -362,10 +567,7 @@ namespace INA_Generations
 			switch (Singleton.RandomRoulette)
 			{
 				case RouletteType.Disabled:
-					Parallel.ForEach(data, row =>
-					{
-						row.RandomizeParenting();
-					});
+					Parallel.ForEach(data, row => { row.RandomizeParenting(); });
 					break;
 				case RouletteType.Gradient:
 					foreach (var row in data)
@@ -373,6 +575,7 @@ namespace INA_Generations
 						row.RandomizeParenting();
 						OutputTable.Invalidate();
 					}
+
 					break;
 				case RouletteType.PieChart:
 					foreach (var row in data)
@@ -380,11 +583,11 @@ namespace INA_Generations
 						row.RandomizeParenting();
 						OutputTable.Invalidate();
 					}
+
 					break;
 				default:
 					throw new ArgumentOutOfRangeException();
 			}
-			
 		}
 
 		private void Selection(DataRow[] data)
@@ -403,6 +606,7 @@ namespace INA_Generations
 								MessageBox.Show($"Iter Limit Reached for {row.SelectionRandom}");
 								selectedIndex = 0;
 							}
+
 							row.SelectionValue = data[selectedIndex].OriginalSpecimen;
 						}
 						catch (Exception e)
@@ -428,9 +632,11 @@ namespace INA_Generations
 						row.SelectionValue = data[selectedIndex].OriginalSpecimen;
 						OutputTable.Invalidate();
 					}
+
 					break;
 				case RouletteType.PieChart:
-					List<(Specimen OriginalSpecimen, string xBin_xInt, double Px)> chances = data.Select(x => (x.OriginalSpecimen, x.OriginalSpecimen.xBin_xInt, x.PxValue)).ToList();
+					List<(Specimen OriginalSpecimen, string xBin_xInt, double Px)> chances =
+						data.Select(x => (x.OriginalSpecimen, x.OriginalSpecimen.xBin_xInt, x.PxValue)).ToList();
 					foreach (var row in data)
 					{
 						var result = Singleton.GetRandomWithRoulette(chances);
@@ -438,6 +644,7 @@ namespace INA_Generations
 						row.SelectionValue = result.result;
 						OutputTable.Invalidate();
 					}
+
 					break;
 				default:
 					throw new ArgumentOutOfRangeException();
@@ -457,29 +664,22 @@ namespace INA_Generations
 		private void CalculatePx(DataRow[] data)
 		{
 			double sum = data.Sum(x => x.GxValue);
-			Parallel.ForEach(data, dataRow =>
-			{
-				dataRow.PxValue = dataRow.GxValue / sum;
-			});
+			Parallel.ForEach(data, dataRow => { dataRow.PxValue = dataRow.GxValue / sum; });
 		}
 
 		private static void CalculateGx(DataRow[] data)
 		{
 			switch (Singleton.TargetFunction)
 			{
-				case INA_Generations.TargetFunction.Max:
+				case TargetFunction.Max:
 					double min = data.Min(x => x.OriginalSpecimen.FxReal);
-					Parallel.ForEach(data, dataRow =>
-					{
-						dataRow.GxValue = dataRow.OriginalSpecimen.FxReal - min + Singleton.d;
-					});
+					Parallel.ForEach(data,
+						dataRow => { dataRow.GxValue = dataRow.OriginalSpecimen.FxReal - min + Singleton.d; });
 					break;
-				case INA_Generations.TargetFunction.Min:
+				case TargetFunction.Min:
 					double max = data.Max(x => x.OriginalSpecimen.FxReal);
-					Parallel.ForEach(data, dataRow =>
-					{
-						dataRow.GxValue = -(dataRow.OriginalSpecimen.FxReal - max) + Singleton.d;
-					});
+					Parallel.ForEach(data,
+						dataRow => { dataRow.GxValue = -(dataRow.OriginalSpecimen.FxReal - max) + Singleton.d; });
 
 					break;
 				default:

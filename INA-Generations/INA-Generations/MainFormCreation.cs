@@ -12,36 +12,53 @@ namespace INA_Generations
 	public partial class MainForm : Form
 	{
 		private TextBox AInput;
+		private TextBox Analysis_AInput;
 		private TextBox BInput;
+		private TextBox Analysis_BInput;
 		private DropDown DInput;
-		
+		private DropDown Analysis_DInput;
 		private TextBox NInput;
+		private TextBox Analysis_NInput;
 		private Button StartButton;
+		private Button Analysis_StartButton;
 		private GridView OutputTable;
+		private GridView GroupedOutputTable;
+		private GridView AnalysisOutputTable;
 		private Label LOutput;
 		private Slider PKSlider;
 		private TextBox PKValue;
+		private TextBox Analysis_PKValue;
 		private Slider PMSlider;
 		private TextBox PMValue;
+		private TextBox Analysis_PMValue;
 		private CheckBox EliteCheckbox;
+		private CheckBox Analysis_EliteCheckbox;
 		private CheckBox BenchmarkCheckbox;
 		private TextBox TInput;
+		private TextBox Analysis_IterInput;
+		private TextBox Analysis_TInput;
 		private TabControl TabsControl;
-		private TabPage FirstPage;
-		private TabPage SecondPage;
+		private TabPage RawDataPage;
+		private TabPage PlotPage;
+		private TabPage GroupedResultsPage;
+		private TabPage AnalysisResultsPage;
 		private PlotView Plot;
 		private StackLayout Inputs;
 		private StackLayout SecondaryInputs;
+		private StackLayout Analysis_Inputs;
 
 		private DropDown RouletteTypeDropdown;
 		private DropDown TargetFunctionDropdown;
-		
+		private DropDown Analysis_TargetFunctionDropdown;
+
 		private Scrollable OutputTableScrollable;
-		
+		private Scrollable GroupedOutputTableScrollable;
+		private Scrollable AnalysisOutputTableScrollable;
+
 		const int inputsSeparation = 30;
 
 		private const string sliderPrecision = "0.00000000";
-		
+
 		public MainForm()
 		{
 			Title = "INA Generacje Hac 19755";
@@ -50,13 +67,16 @@ namespace INA_Generations
 			MinimumSize = new Size(1220, 400);
 			Resizable = true;
 			Inputs = CreateInputs();
+			Analysis_Inputs = CreateAnalysisInputs();
 			SecondaryInputs = CreateSecondaryInputs();
 			CreateOutputTable();
+			CreateGroupedOutputTable();
+			CreateAnalysisOutputTable();
 			Plot = new PlotView();
 			Plot.Width = 600;
 			Plot.Height = 400;
 
-			FirstPage = new TabPage()
+			RawDataPage = new TabPage()
 			{
 				Content = new StackLayout()
 				{
@@ -69,9 +89,9 @@ namespace INA_Generations
 						OutputTableScrollable
 					}
 				},
-				Text = "Wyniki"
+				Text = "Populacja"
 			};
-			SecondPage = new TabPage()
+			PlotPage = new TabPage()
 			{
 				Content = new StackLayout()
 				{
@@ -85,18 +105,44 @@ namespace INA_Generations
 				Text = "Wykres"
 			};
 
-			
-			
+			GroupedResultsPage = new TabPage()
+			{
+				Content = new StackLayout()
+				{
+					Orientation = Orientation.Vertical,
+					Padding = 10,
+					Items =
+					{
+						GroupedOutputTableScrollable
+					}
+				},
+				Text = "Wyniki"
+			};
+			AnalysisResultsPage = new TabPage()
+			{
+				Content = new StackLayout()
+				{
+					Orientation = Orientation.Vertical,
+					Padding = 10,
+					Items =
+					{
+						Analysis_Inputs,
+						AnalysisOutputTableScrollable
+					}
+				},
+				Text = "Analiza"
+			};
+
 			TabsControl = new TabControl()
 			{
 				Pages =
 				{
-					FirstPage, SecondPage
+					RawDataPage, PlotPage, GroupedResultsPage, AnalysisResultsPage
 				}
 			};
-			
+
 			TabsControl.SelectedIndexChanged += TabsControlOnSelectedIndexChanged;
-			
+
 			Content = new StackLayout
 			{
 				Orientation = Orientation.Vertical,
@@ -106,14 +152,24 @@ namespace INA_Generations
 					TabsControl
 				}
 			};
-			
+
 			this.SizeChanged += (sender, args) =>
 			{
 				if (OutputTable != null)
 				{
 					OutputTable.Width = Width - 40 - 30 - 30;
 				}
-				
+
+				if (GroupedOutputTable != null)
+				{
+					GroupedOutputTable.Width = Width - 40 - 30 - 30;
+				}
+
+				if (AnalysisOutputTable != null)
+				{
+					AnalysisOutputTable.Width = Width - 40 - 30 - 30;
+				}
+
 				if (Plot != null)
 				{
 					Plot.Width = Width - 40 - 30 - 30;
@@ -126,6 +182,18 @@ namespace INA_Generations
 					OutputTableScrollable.Height = Height - 180 - 20;
 				}
 
+				if (GroupedOutputTableScrollable != null)
+				{
+					GroupedOutputTableScrollable.Width = Width - 40 - 30;
+					GroupedOutputTableScrollable.Height = Height - 180 - 20;
+				}
+
+				if (AnalysisOutputTableScrollable != null)
+				{
+					AnalysisOutputTableScrollable.Width = Width - 40 - 30;
+					AnalysisOutputTableScrollable.Height = Height - 140 - 20;
+				}
+
 				if (TabsControl != null)
 				{
 					TabsControl.Width = Width - 40;
@@ -134,12 +202,109 @@ namespace INA_Generations
 			};
 		}
 
+		private StackLayout CreateAnalysisInputs()
+		{
+			Analysis_AInput = new TextBox()
+			{
+				Text = "-4",
+				Width = 40
+			};
+			Analysis_BInput = new TextBox()
+			{
+				Text = "12",
+				Width = 40
+			};
+			Analysis_DInput = new DropDown()
+			{
+				Items = { "1", "0.1", "0.01", "0.001" },
+				SelectedIndex = 3
+			};
+			Analysis_PKValue = new TextBox()
+			{
+				Text = $"{0.8.ToString("0.0")};{0.5.ToString("0.0")};{0.3.ToString("0.0")};{0.1.ToString("0.0")}",
+				Width = 150
+			};
+			Analysis_PMValue = new TextBox()
+			{
+				Text = $"{0.0005.ToString("0.0000")};{0.00005.ToString("0.00000")};{0.00001.ToString("0.00000")}",
+				Width = 150
+			};
+			Analysis_NInput = new TextBox()
+			{
+				Text = $"{20};{50};{100};{1000}",
+				Width = 150
+			};
+			Analysis_TInput = new TextBox()
+			{
+				Text = $"{50};{100};{300}",
+				Width = 150
+			};
+			Analysis_IterInput = new TextBox()
+			{
+				Text = "10",
+				ToolTip =
+					"Ilość iteracji dla każdej permutacji parametrów\nz których wynik jest brany jako wartość średnia\nżeby zredukować wpływ \"szczęścia\" na wynik",
+				Width = 40
+			};
+			Analysis_StartButton = new Button()
+			{
+				Text = "Start",
+				ToolTip = "Może potrwać bardzo długo!",
+				Command = new Command((object sender, EventArgs e) => StartAnalysis())
+			};
+			Analysis_TargetFunctionDropdown = new DropDown()
+			{
+				Items = { "Maksimum", "Minimum" },
+				SelectedIndex = 0
+			};
+			Analysis_EliteCheckbox = new CheckBox()
+			{
+				Checked = true,
+				ThreeState = false
+			};
+			
+			return new StackLayout()
+			{
+				Orientation = Orientation.Horizontal,
+				AlignLabels = true,
+				VerticalContentAlignment = VerticalAlignment.Center,
+				HorizontalContentAlignment = HorizontalAlignment.Center,
+				Padding = 10,
+				Items =
+				{
+					Label("A:"),
+					Analysis_AInput,
+					Label("B:"),
+					Analysis_BInput,
+					Label("D:"),
+					Analysis_DInput,
+					Label("Elita"),
+					Analysis_EliteCheckbox,
+					Label("Cel"),
+					Analysis_TargetFunctionDropdown,
+					Label("PK[]:"),
+					Analysis_PKValue,
+					Label("PM[]:"),
+					Analysis_PMValue,
+					Label("N[]:"),
+					Analysis_NInput,
+					Label("T[]:"),
+					Analysis_TInput,
+					Label("Iters:", 
+						"Ilość iteracji dla każdej permutacji parametrów\nz których wynik jest brany jako wartość średnia\nżeby zredukować wpływ \"szczęścia\" na wynik"),
+					Analysis_IterInput,
+					Analysis_StartButton
+				}
+			};
+		}
+
+
 		private void TabsControlOnSelectedIndexChanged(object sender, EventArgs e)
 		{
 			switch (TabsControl.SelectedIndex)
 			{
 				case 0:
-					FirstPage.Content = new StackLayout()
+					RawDataPage.Content = new StackLayout()
 					{
 						Orientation = Orientation.Vertical,
 						Padding = 10,
@@ -152,7 +317,7 @@ namespace INA_Generations
 					};
 					break;
 				case 1:
-					SecondPage.Content = new StackLayout()
+					PlotPage.Content = new StackLayout()
 					{
 						Orientation = Orientation.Vertical,
 						Padding = 10,
@@ -164,8 +329,20 @@ namespace INA_Generations
 						}
 					};
 					break;
+				case 2:
+					GroupedResultsPage.Content = new StackLayout()
+					{
+						Orientation = Orientation.Vertical,
+						Padding = 10,
+						Items =
+						{
+							Inputs,
+							SecondaryInputs,
+							GroupedOutputTableScrollable
+						}
+					};
+					break;
 			}
-			//TabsControl.Invalidate();
 		}
 
 		private StackLayout CreateSecondaryInputs()
@@ -196,7 +373,7 @@ namespace INA_Generations
 				ThreeState = false,
 				Checked = true
 			};
-			
+
 			BenchmarkCheckbox = new CheckBox()
 			{
 				ThreeState = false,
@@ -235,12 +412,32 @@ namespace INA_Generations
 
 		private void ClearOutputTable()
 		{
-			OutputTable.DataStore = new DataRow[0];
+			OutputTable.DataStore = Array.Empty<DataRow>();
 		}
-		
+
+		private void ClearGroupOutputTable()
+		{
+			GroupedOutputTable.DataStore = Array.Empty<GroupDataRow>();
+		}
+
+		private void ClearAnalysisOutputTable()
+		{
+			AnalysisOutputTable.DataStore = Array.Empty<AnalysisDataRow>();
+		}
+
 		private void AddDataToTable(DataRow[] data)
 		{
 			OutputTable.DataStore = data;
+		}
+
+		private void AddGroupDataToTable(GroupDataRow[] dataGroups)
+		{
+			GroupedOutputTable.DataStore = dataGroups;
+		}
+
+		private void AddAnalysisDataToTable(List<AnalysisDataRow> dataAnalysis)
+		{
+			AnalysisOutputTable.DataStore = dataAnalysis;
 		}
 
 		private void CreateOutputTable()
@@ -261,13 +458,76 @@ namespace INA_Generations
 			foreach (PropertyInfo property in typeof(DataRow).GetProperties())
 			{
 				if (property.PropertyType != typeof((string, string))) continue;
-				
+
 				OutputTable.Columns.Add(new GridColumn()
 				{
 					HeaderText = (((string title, string))property.GetValue(DataRow.Empty)).title,
 					DataCell = new TextBoxCell()
 					{
-						Binding = Binding.Property<DataRow, string>(x => (((string, string value))property.GetValue(x)).value)
+						Binding = Binding.Property<DataRow, string>(x =>
+							(((string, string value))property.GetValue(x)).value)
+					}
+				});
+			}
+		}
+
+		private void CreateGroupedOutputTable()
+		{
+			GroupedOutputTable = new GridView()
+			{
+				DataStore = new GroupDataRow[0],
+				Width = Width - 42
+			};
+
+			GroupedOutputTableScrollable = new Scrollable()
+			{
+				Content = GroupedOutputTable,
+				Width = Width - 40,
+				Height = Height - 180
+			};
+
+			foreach (PropertyInfo property in typeof(GroupDataRow).GetProperties())
+			{
+				if (property.PropertyType != typeof((string, string))) continue;
+
+				GroupedOutputTable.Columns.Add(new GridColumn()
+				{
+					HeaderText = (((string title, string))property.GetValue(GroupDataRow.Empty)).title,
+					DataCell = new TextBoxCell()
+					{
+						Binding = Binding.Property<GroupDataRow, string>(x =>
+							(((string, string value))property.GetValue(x)).value)
+					}
+				});
+			}
+		}
+
+		private void CreateAnalysisOutputTable()
+		{
+			AnalysisOutputTable = new GridView()
+			{
+				DataStore = new AnalysisDataRow[0],
+				Width = Width - 42
+			};
+
+			AnalysisOutputTableScrollable = new Scrollable()
+			{
+				Content = AnalysisOutputTable,
+				Width = Width - 40,
+				Height = Height - 180
+			};
+
+			foreach (PropertyInfo property in typeof(AnalysisDataRow).GetProperties())
+			{
+				if (property.PropertyType != typeof((string, string))) continue;
+
+				AnalysisOutputTable.Columns.Add(new GridColumn()
+				{
+					HeaderText = (((string title, string))property.GetValue(AnalysisDataRow.Empty)).title,
+					DataCell = new TextBoxCell()
+					{
+						Binding = Binding.Property<AnalysisDataRow, string>(x =>
+							(((string, string value))property.GetValue(x)).value)
 					}
 				});
 			}
@@ -324,6 +584,7 @@ namespace INA_Generations
 							PKValue.Text = 0.0.ToString(sliderPrecision);
 							val = 0.0;
 						}
+
 						PKSlider.Value = (int)Math.Round(val * (double)PKSlider.MaxValue);
 					}
 					catch (Exception e)
@@ -333,7 +594,7 @@ namespace INA_Generations
 				}
 			};
 			PKSlider.ValueChanged += (sender, args) => SyncPKValueToSlider();
-			
+
 			PMSlider = new Slider()
 			{
 				MinValue = 0,
@@ -366,6 +627,7 @@ namespace INA_Generations
 							PMValue.Text = 0.0.ToString(sliderPrecision);
 							val = 0.0;
 						}
+
 						PMSlider.Value = (int)Math.Round(val * (double)PMSlider.MaxValue);
 					}
 					catch (Exception e)
@@ -375,13 +637,13 @@ namespace INA_Generations
 				}
 			};
 			PMSlider.ValueChanged += (sender, args) => SyncPMValueToSlider();
-			
+
 			StartButton = new Button()
 			{
 				Text = "START",
 				Command = new Command((sender, args) => ExecuteGeneration())
 			};
-			
+
 			var inputs = new StackLayout()
 			{
 				Orientation = Orientation.Horizontal,
@@ -415,11 +677,10 @@ namespace INA_Generations
 				}
 			};
 
-			
 
 			return inputs;
 		}
-		
+
 		Label Label(string text, string tooltip = null)
 		{
 			if (tooltip == null)
@@ -429,6 +690,7 @@ namespace INA_Generations
 					Text = text
 				};
 			}
+
 			return new Label()
 			{
 				Text = text,
@@ -449,7 +711,7 @@ namespace INA_Generations
 			double val = PKSlider.Value;
 			PKValue.Text = (val / (double)PKSlider.MaxValue).ToString(sliderPrecision);
 		}
-		
+
 		private void SyncPMValueToSlider()
 		{
 			double val = PMSlider.Value;
