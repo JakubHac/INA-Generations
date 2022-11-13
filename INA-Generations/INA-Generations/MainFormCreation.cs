@@ -221,27 +221,47 @@ namespace INA_Generations
 			};
 			Analysis_PKValue = new TextBox()
 			{
-				Text = $"{0.8.ToString("0.0")};{0.5.ToString("0.0")};{0.3.ToString("0.0")};{0.1.ToString("0.0")}",
+				Text = "",
 				Width = 150
 			};
+			
+			for (int pk = 50; pk <= 90; pk+=5)
+			{
+				Analysis_PKValue.Text += $";{(((double)pk)/100.0)}";
+			}
+			Analysis_PKValue.Text = Analysis_PKValue.Text.Substring(1);
+			
 			Analysis_PMValue = new TextBox()
 			{
-				Text = $"{0.0005.ToString("0.0000")};{0.00005.ToString("0.00000")};{0.00001.ToString("0.00000")}",
+				Text = $"{0.0001.ToString("0.0000")};{0.0005.ToString("0.0000")};{0.001.ToString("0.000")};{0.005.ToString("0.000")};{0.01.ToString("0.00")};{0.05.ToString("0.00")}",
 				Width = 150
 			};
 			Analysis_NInput = new TextBox()
 			{
-				Text = $"{20};{50};{100};{1000}",
+				Text = "",
 				Width = 150
 			};
+
+			for (int n = 30; n <= 80; n+=5)
+			{
+				Analysis_NInput.Text += $";{n}";
+			}
+			Analysis_NInput.Text = Analysis_NInput.Text.Substring(1);
+			
 			Analysis_TInput = new TextBox()
 			{
-				Text = $"{50};{100};{300}",
+				Text = "",
 				Width = 150
 			};
+			for (int t = 50; t <= 200; t+=10)
+			{
+				Analysis_TInput.Text += $";{t}";
+			}
+			Analysis_TInput.Text = Analysis_TInput.Text.Substring(1);
+			
 			Analysis_IterInput = new TextBox()
 			{
-				Text = "10",
+				Text = "1000",
 				ToolTip =
 					"Ilość iteracji dla każdej permutacji parametrów\nz których wynik jest brany jako wartość średnia\nżeby zredukować wpływ \"szczęścia\" na wynik",
 				Width = 40
