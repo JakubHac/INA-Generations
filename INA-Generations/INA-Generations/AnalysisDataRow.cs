@@ -14,7 +14,7 @@
 		public (string, string) T => ("T", TValue.ToString("D"));
 		public (string, string) PK => ("PK", PKValue.ToString("0." + new string('#', 99)));
 		public (string, string) PM => ("PM", PMValue.ToString("0." + new string('#', 99)));
-		public (string, string) Cost => ("N * T", (NValue * TValue).ToString("D"));
-		public (string, string) AvgFX => ("Avg Best F(x)", AvgFXValue.ToString("0." + new string('#', 99)));
+		public (string, string) Cost => ("Koszt", (NValue * TValue).ToString("D"));
+		public (string, string) AvgFX => ("Avg F(x)", AvgFXValue.ToString("0." + new string('#', 99)));
 	}
 }

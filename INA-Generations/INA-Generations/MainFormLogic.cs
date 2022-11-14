@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Eto.Forms;
 using ScottPlot.Plottable;
@@ -12,6 +13,10 @@ namespace INA_Generations
 {
 	public partial class MainForm
 	{
+		private Task DataGrouping = null;
+		private CancellationToken GroupingCancellationToken = CancellationToken.None;
+		private CancellationTokenSource GroupingCancellationTokenSource = new CancellationTokenSource();
+
 		private void StartAnalysis()
 		{
 			if (!(ParseHelper.ParseDouble(Analysis_AInput.Text, "A", out double a) &&
@@ -91,7 +96,7 @@ namespace INA_Generations
 				"Maksimum" => TargetFunction.Max,
 				"Minimum" => TargetFunction.Min
 			};
-			
+
 			List<AnalysisDataRow> analysisDataRows = new List<AnalysisDataRow>();
 
 			bool elite = Analysis_EliteCheckbox.Checked.Value;
@@ -100,7 +105,7 @@ namespace INA_Generations
 			Singleton.b = b;
 			int l = (int)Math.Floor(Math.Log((b - a) / d, 2) + 1.0);
 			Singleton.l = l;
-			
+
 			ClearAnalysisOutputTable();
 
 			for (long n = 0; n < Ns.Length; n++)
@@ -118,7 +123,7 @@ namespace INA_Generations
 							{
 								DataRow[] data = new DataRow[Ns[n]];
 								CreateInitialData(data, Ns[n]);
-								
+
 								for (int j = 0; j < Ts[t]; j++)
 								{
 									CalculateGx(data);
@@ -137,9 +142,10 @@ namespace INA_Generations
 										MoveDataToNextGeneration(data);
 									}
 								}
-								
-								FXs.Add(data.Max(x => x.FinalFxRealValue));
+
+								FXs.Add(data.Average(x => x.FinalFxRealValue));
 							}
+
 							analysisDataRows.Add(new AnalysisDataRow()
 							{
 								NValue = Ns[n],
@@ -155,13 +161,15 @@ namespace INA_Generations
 
 			if (Singleton.TargetFunction == TargetFunction.Max)
 			{
-				analysisDataRows = analysisDataRows.OrderByDescending(x => x.AvgFXValue).ThenBy(x => x.NValue * x.TValue).ToList();
+				analysisDataRows = analysisDataRows.OrderByDescending(x => x.AvgFXValue)
+					.ThenBy(x => x.NValue * x.TValue).ToList();
 			}
 			else
 			{
-				analysisDataRows = analysisDataRows.OrderBy(x => x.AvgFXValue).ThenBy(x => x.NValue * x.TValue).ToList();
+				analysisDataRows = analysisDataRows.OrderBy(x => x.AvgFXValue).ThenBy(x => x.NValue * x.TValue)
+					.ToList();
 			}
-			
+
 			AddAnalysisDataToTable(analysisDataRows);
 		}
 
@@ -193,14 +201,16 @@ namespace INA_Generations
 
 			SyncPKValueToSlider();
 			SyncPMValueToSlider();
+			
+			GroupingCancellationTokenSource.Cancel();
+			GroupingCancellationTokenSource = new CancellationTokenSource();
+			GroupingCancellationToken = CancellationToken.None;
 
 			Singleton.PK = PKSlider.Value / (double)PKSlider.MaxValue;
 			Singleton.PM = PMSlider.Value / (double)PMSlider.MaxValue;
 
 			int l = (int)Math.Floor(Math.Log((b - a) / d, 2) + 1.0);
 			bool elite = EliteCheckbox.Checked.Value;
-
-			//MessageBox.Show($"Elite: {elite}");
 
 			Singleton.a = a;
 			Singleton.b = b;
@@ -225,8 +235,17 @@ namespace INA_Generations
 			LOutput.Text = l.ToString();
 			ClearOutputTable();
 			ClearGroupOutputTable();
+			bool isBenchmarkRun = BenchmarkCheckbox.Checked.Value && t == 1;
+			Stopwatch benchmark = isBenchmarkRun ? Stopwatch.StartNew() : null;
+			Stopwatch benchmark_total = isBenchmarkRun ? Stopwatch.StartNew() : null;
 			DataRow[] data = new DataRow[n];
 			CreateInitialData(data, n);
+			string benchmarks = "";
+			if (isBenchmarkRun)
+			{
+				benchmarks = $"Creating Random Data: {benchmark.ElapsedMilliseconds}[ms]\n";
+			}
+
 			List<double> MinFx = new List<double>();
 			List<double> MaxFx = new List<double>();
 			List<double> AvgFx = new List<double>();
@@ -259,89 +278,83 @@ namespace INA_Generations
 				AddDataToTable(data);
 			}
 
-			bool isBenchmarkRun = BenchmarkCheckbox.Checked.Value && t == 1;
-			Stopwatch benchmark = isBenchmarkRun ? Stopwatch.StartNew() : null;
-			List<(string, long)> benchmarks = new List<(string, long)>();
-
 			for (int i = 0; i < t; i++)
 			{
 				CalculateGx(data);
 				if (isBenchmarkRun)
 				{
-					benchmarks.Add(("Gx", benchmark.ElapsedMilliseconds));
+					benchmarks += $"Gx: {benchmark.ElapsedMilliseconds}[ms]\n";
 					benchmark.Restart();
 				}
 
 				CalculatePx(data);
 				if (isBenchmarkRun)
 				{
-					benchmarks.Add(("Px", benchmark.ElapsedMilliseconds));
+					benchmarks += $"Px: {benchmark.ElapsedMilliseconds}[ms]\n";
 					benchmark.Restart();
 				}
 
 				CalculateQx(data);
 				if (isBenchmarkRun)
 				{
-					benchmarks.Add(("Qx", benchmark.ElapsedMilliseconds));
+					benchmarks += $"Qx: {benchmark.ElapsedMilliseconds}[ms]\n";
 					benchmark.Restart();
 				}
 
 				Selection(data);
 				if (isBenchmarkRun)
 				{
-					benchmarks.Add(("Selection", benchmark.ElapsedMilliseconds));
+					benchmarks += $"Selection: {benchmark.ElapsedMilliseconds}[ms]\n";
 					benchmark.Restart();
 				}
 
 				Parenting(data);
 				if (isBenchmarkRun)
 				{
-					benchmarks.Add(("Parenting", benchmark.ElapsedMilliseconds));
+					benchmarks += $"Parenting: {benchmark.ElapsedMilliseconds}[ms]\n";
 					benchmark.Restart();
 				}
 
 				PairParents(data);
 				if (isBenchmarkRun)
 				{
-					benchmarks.Add(("Pairing", benchmark.ElapsedMilliseconds));
+					benchmarks += $"Pairing: {benchmark.ElapsedMilliseconds}[ms]\n";
 					benchmark.Restart();
 				}
 
 				RandomizePC(data);
 				if (isBenchmarkRun)
 				{
-					benchmarks.Add(("Pc", benchmark.ElapsedMilliseconds));
+					benchmarks += $"Pc: {benchmark.ElapsedMilliseconds}[ms]\n";
 					benchmark.Restart();
 				}
 
 				Fuck(data);
 				if (isBenchmarkRun)
 				{
-					benchmarks.Add(("Fucking", benchmark.ElapsedMilliseconds));
+					benchmarks += $"Children: {benchmark.ElapsedMilliseconds}[ms]\n";
 					benchmark.Restart();
 				}
 
 				Mutate(data, elite);
 				if (isBenchmarkRun)
 				{
-					benchmarks.Add(("Mutating", benchmark.ElapsedMilliseconds));
+					benchmarks += $"Mutating: {benchmark.ElapsedMilliseconds}[ms]\n";
 					benchmark.Restart();
 				}
 
 				Finalize(data);
 
-				//MessageBox.Show($"[0] Fx: {data[0].FinalFxRealValue}");
-				
 				if (isBenchmarkRun)
 				{
-					benchmarks.Add(("Finalization", benchmark.ElapsedMilliseconds));
+					benchmarks += $"Finalization: {benchmark.ElapsedMilliseconds}[ms]\n";
 					benchmark.Restart();
 				}
-				
+
 				MinFx.Add(data.Min(x => x.FinalFxRealValue));
 				MaxFx.Add(data.Max(x => x.FinalFxRealValue));
 				AvgFx.Add(data.Average(x => x.FinalFxRealValue));
-				
+
 				if (i + 1 < t)
 				{
 					MoveDataToNextGeneration(data);
@@ -351,15 +364,8 @@ namespace INA_Generations
 			if (!addDataAtStart)
 			{
 				AddDataToTable(data);
-				if (isBenchmarkRun)
-				{
-					benchmarks.Add(("Display", benchmark.ElapsedMilliseconds));
-					benchmark.Stop();
-				}
 			}
-
-			GroupData(data);
-
+			
 			MinGxPlot.Ys = MinFx.ToArray();
 			MinGxPlot.MaxRenderIndex = MinGxPlot.PointCount - 1;
 			MaxGxPlot.Ys = MaxFx.ToArray();
@@ -369,55 +375,114 @@ namespace INA_Generations
 
 			Plot.Plot.AxisAuto(0.05f, 0.1f);
 			Plot.Refresh();
-			//MessageBox.Show($"Avg count: {AvgFx.Count} - {AvgGxPlot.Ys.Length}");
+
+			if (isBenchmarkRun)
+			{
+				benchmarks += $"Display: {benchmark.ElapsedMilliseconds}[ms]\n";
+				benchmark.Stop();
+				benchmarks += $"Total: {benchmark_total.ElapsedMilliseconds}[ms]";
+				benchmark_total.Stop();
+			}
 
 			if (isBenchmarkRun && BenchmarkCheckbox.Checked.Value)
 			{
-				MessageBox.Show(
-					benchmarks.Aggregate($"All: {benchmarks.Sum(x => x.Item2)}[ms]",
-						(s, tuple) => $"{s}\n{tuple.Item1}: {tuple.Item2}[ms]"), "Benchmark",
-					MessageBoxType.Information);
+				MessageBox.Show(benchmarks, "Benchmark Results", MessageBoxType.Question);
+			}
+			
+			AddGroupDataToTable(new GroupDataRow[]{new GroupDataRow(){xBinValue = "grupowanie odbywa się na osobnym wątku, chwilę trzeba poczekać"}});
+			GroupingCancellationToken = GroupingCancellationTokenSource.Token;
+			DataGrouping = Task.Run(() => GroupData(data, GroupingCancellationToken), GroupingCancellationToken); 
+		}
+
+		class DataGroup : IComparer<DataGroup>, IComparable<DataGroup>
+		{
+			public double XReal;
+			public double Percent;
+			public double Fx;
+
+			public DataGroup(double xReal, double percent, double fx)
+			{
+				XReal = xReal;
+				Percent = percent;
+				Fx = fx;
+			}
+
+			public int CompareTo(DataGroup other)
+			{
+				if (ReferenceEquals(this, other)) return 0;
+				if (ReferenceEquals(null, other)) return 1;
+				return Fx.CompareTo(other.Fx);
+			}
+
+			public int Compare(DataGroup x, DataGroup y)
+			{
+				if (ReferenceEquals(x, y)) return 0;
+				if (ReferenceEquals(null, y)) return 1;
+				if (ReferenceEquals(null, x)) return -1;
+				return x.Fx.CompareTo(y.Fx);
 			}
 		}
 
-		private void GroupData(DataRow[] data)
+		private void GroupData(DataRow[] data, CancellationToken token)
 		{
-			Dictionary<double, long> XRealCounts = new Dictionary<double, long>();
-			foreach (var dataRow in data)
+			try
 			{
-				if (XRealCounts.ContainsKey(dataRow.FinalXRealValue))
+				Dictionary<double, long> XRealCounts = new Dictionary<double, long>();
+				foreach (var dataRow in data)
 				{
-					XRealCounts[dataRow.FinalXRealValue]++;
+					if (token.IsCancellationRequested)
+					{
+						return;
+					}
+					if (XRealCounts.ContainsKey(dataRow.FinalXRealValue))
+					{
+						XRealCounts[dataRow.FinalXRealValue]++;
+					}
+					else
+					{
+						XRealCounts.Add(dataRow.FinalXRealValue, 1);
+					}
 				}
-				else
+
+				double dataCountAsDouble = data.Length * 0.01;
+
+				SortedSet<DataGroup> sortedGroups = new SortedSet<DataGroup>();
+
+				foreach (var xRealCount in XRealCounts)
 				{
-					XRealCounts.Add(dataRow.FinalXRealValue, 1);
+					if (token.IsCancellationRequested)
+					{
+						return;
+					}
+					sortedGroups.Add(new DataGroup(xRealCount.Key, xRealCount.Value / dataCountAsDouble,
+						MathHelper.Fx(xRealCount.Key)));
 				}
+
+				IEnumerable<DataGroup> groupsData = (Singleton.TargetFunction == TargetFunction.Max)
+					? sortedGroups
+					: sortedGroups.Reverse();
+
+				GroupDataRow[] Groups = new GroupDataRow[sortedGroups.Count];
+
+				long i = 0;
+				foreach (var group in groupsData)
+				{
+					if (token.IsCancellationRequested)
+					{
+						return;
+					}
+					Groups[i] = new GroupDataRow(i + 1, group.XReal, group.Percent);
+					i++;
+				}
+
+				Application.Instance.Invoke(() => AddGroupDataToTable(Groups));
 			}
-
-
-			var xRealPercentPair =
-				XRealCounts.Select(x => (x.Key, (((double)x.Value) * 100.0) / ((double)data.Length)));
-
-			List<(double xReal, double percent)> groupsData = null;
-
-			if (Singleton.TargetFunction == TargetFunction.Max)
+			catch (Exception e)
 			{
-				groupsData = xRealPercentPair.OrderByDescending(x => MathHelper.Fx(x.Key)).ToList();
+				MessageBox.Show($"Error while grouping: {e}");
+				DataGrouping = null;
 			}
-			else
-			{
-				groupsData = xRealPercentPair.OrderBy(x => MathHelper.Fx(x.Key)).ToList();
-			}
-
-			GroupDataRow[] Groups = new GroupDataRow[groupsData.Count];
-
-			for (int i = 0; i < groupsData.Count; i++)
-			{
-				Groups[i] = new GroupDataRow(i + 1, groupsData[i].xReal, groupsData[i].percent);
-			}
-
-			AddGroupDataToTable(Groups);
+			
 		}
 
 		private void CreateInitialData(DataRow[] data, long n)
@@ -481,7 +546,7 @@ namespace INA_Generations
 
 				string xBin = new string(chromosome);
 				dataRow.MutatedChromosomeValue = xBin;
-				if (elite)
+				if (!eliteMadeIt)
 				{
 					long xInt = MathHelper.XBinToXInt(xBin);
 					if (xInt == eliteXInt)
@@ -489,6 +554,7 @@ namespace INA_Generations
 						eliteMadeIt = true;
 						return;
 					}
+
 					double xReal = MathHelper.XIntToXReal(xInt);
 					double Fx = MathHelper.Fx(xReal);
 					if (Singleton.TargetFunction == TargetFunction.Max)
