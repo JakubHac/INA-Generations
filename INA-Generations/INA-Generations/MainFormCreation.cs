@@ -225,7 +225,7 @@ namespace INA_Generations
 				Width = 150
 			};
 			
-			for (int pk = 50; pk <= 90; pk+=5)
+			for (int pk = 50; pk <= 90; pk+=10)
 			{
 				Analysis_PKValue.Text += $";{(((double)pk)/100.0)}";
 			}
@@ -242,7 +242,7 @@ namespace INA_Generations
 				Width = 150
 			};
 
-			for (int n = 30; n <= 80; n+=5)
+			for (int n = 30; n <= 80; n+=10)
 			{
 				Analysis_NInput.Text += $";{n}";
 			}
@@ -253,7 +253,7 @@ namespace INA_Generations
 				Text = "",
 				Width = 150
 			};
-			for (int t = 50; t <= 200; t+=10)
+			for (int t = 50; t <= 150; t+=10)
 			{
 				Analysis_TInput.Text += $";{t}";
 			}
@@ -261,7 +261,7 @@ namespace INA_Generations
 			
 			Analysis_IterInput = new TextBox()
 			{
-				Text = "1000",
+				Text = "100",
 				ToolTip =
 					"Ilość iteracji dla każdej permutacji parametrów\nz których wynik jest brany jako wartość średnia\nżeby zredukować wpływ \"szczęścia\" na wynik",
 				Width = 40

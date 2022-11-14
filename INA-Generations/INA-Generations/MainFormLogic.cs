@@ -102,7 +102,7 @@ namespace INA_Generations
 			Singleton.l = l;
 			
 			ClearAnalysisOutputTable();
-			
+
 			for (long n = 0; n < Ns.Length; n++)
 			{
 				for (long t = 0; t < Ts.Length; t++)
@@ -129,12 +129,12 @@ namespace INA_Generations
 									PairParents(data);
 									RandomizePC(data);
 									Fuck(data);
-									Mutate(data);
+									Mutate(data, elite);
 									Finalize(data);
 
 									if (j + 1 < Ts[t])
 									{
-										MoveDataToNextGeneration(data, elite);
+										MoveDataToNextGeneration(data);
 									}
 								}
 								
@@ -200,6 +200,8 @@ namespace INA_Generations
 			int l = (int)Math.Floor(Math.Log((b - a) / d, 2) + 1.0);
 			bool elite = EliteCheckbox.Checked.Value;
 
+			//MessageBox.Show($"Elite: {elite}");
+
 			Singleton.a = a;
 			Singleton.b = b;
 			Singleton.d = d;
@@ -228,9 +230,9 @@ namespace INA_Generations
 			List<double> MinFx = new List<double>();
 			List<double> MaxFx = new List<double>();
 			List<double> AvgFx = new List<double>();
-			MinFx.Add(data.Min(x => x.OriginalSpecimen.FxReal));
-			MaxFx.Add(data.Max(x => x.OriginalSpecimen.FxReal));
-			AvgFx.Add(data.Average(x => x.OriginalSpecimen.FxReal));
+			MinFx.Add(data.Min(x => x.OriginalSpecimen.Fx));
+			MaxFx.Add(data.Max(x => x.OriginalSpecimen.Fx));
+			AvgFx.Add(data.Average(x => x.OriginalSpecimen.Fx));
 			Plot.Reset();
 			SignalPlot MinGxPlot = new SignalPlot();
 			MinGxPlot.Color = Color.Red;
@@ -319,7 +321,7 @@ namespace INA_Generations
 					benchmark.Restart();
 				}
 
-				Mutate(data);
+				Mutate(data, elite);
 				if (isBenchmarkRun)
 				{
 					benchmarks.Add(("Mutating", benchmark.ElapsedMilliseconds));
@@ -327,19 +329,22 @@ namespace INA_Generations
 				}
 
 				Finalize(data);
+
+				//MessageBox.Show($"[0] Fx: {data[0].FinalFxRealValue}");
+				
 				if (isBenchmarkRun)
 				{
 					benchmarks.Add(("Finalization", benchmark.ElapsedMilliseconds));
 					benchmark.Restart();
 				}
-
+				
 				MinFx.Add(data.Min(x => x.FinalFxRealValue));
 				MaxFx.Add(data.Max(x => x.FinalFxRealValue));
 				AvgFx.Add(data.Average(x => x.FinalFxRealValue));
-
+				
 				if (i + 1 < t)
 				{
-					MoveDataToNextGeneration(data, elite);
+					MoveDataToNextGeneration(data);
 				}
 			}
 
@@ -424,44 +429,11 @@ namespace INA_Generations
 			}
 		}
 
-		private void MoveDataToNextGeneration(DataRow[] data, bool elite)
+		private void MoveDataToNextGeneration(DataRow[] data)
 		{
-			double? eliteXReal = null;
-			if (elite)
-			{
-				double bestGx = Double.MinValue;
-				foreach (var dataRow in data)
-				{
-					if (dataRow.GxValue > bestGx)
-					{
-						bestGx = dataRow.GxValue;
-						eliteXReal = dataRow.OriginalSpecimen.xReal;
-					}
-				}
-			}
-
-			bool eliteMadeIt = !elite;
-
 			for (int i = 0; i < data.Length; i++)
 			{
-				var temp = data[i];
-				double finalXReal = temp.FinalXRealValue;
-				if (!eliteMadeIt)
-				{
-					if (finalXReal == eliteXReal)
-					{
-						eliteMadeIt = true;
-					}
-				}
-
-				data[i] = new DataRow(new Specimen(finalXReal), temp.Index);
-			}
-
-			if (elite && !eliteMadeIt)
-			{
-				int index = Singleton.Random.Next(0, data.Length - 1);
-				var temp = data[index];
-				data[index] = new DataRow(new Specimen(eliteXReal.Value), temp.Index);
+				data[i] = new DataRow(new Specimen(data[i].FinalXRealValue), data[i].Index);
 			}
 		}
 
@@ -474,8 +446,26 @@ namespace INA_Generations
 			});
 		}
 
-		private void Mutate(DataRow[] data)
+		private void Mutate(DataRow[] data, bool elite)
 		{
+			long eliteXInt = 0;
+			double bestFx = 0;
+			if (elite)
+			{
+				double bestGX = Double.MinValue;
+				foreach (var row in data)
+				{
+					if (row.GxValue > bestGX)
+					{
+						eliteXInt = row.OriginalSpecimen.XInt;
+						bestGX = row.GxValue;
+						bestFx = row.OriginalSpecimen.Fx;
+					}
+				}
+			}
+
+			bool eliteMadeIt = !elite;
+
 			Parallel.ForEach(data, dataRow =>
 			{
 				dataRow.MutatedGenesValue = new SortedSet<int>();
@@ -489,8 +479,42 @@ namespace INA_Generations
 					}
 				}
 
-				dataRow.MutatedChromosomeValue = new string(chromosome);
+				string xBin = new string(chromosome);
+				dataRow.MutatedChromosomeValue = xBin;
+				if (elite)
+				{
+					long xInt = MathHelper.XBinToXInt(xBin);
+					if (xInt == eliteXInt)
+					{
+						eliteMadeIt = true;
+						return;
+					}
+					double xReal = MathHelper.XIntToXReal(xInt);
+					double Fx = MathHelper.Fx(xReal);
+					if (Singleton.TargetFunction == TargetFunction.Max)
+					{
+						if (Fx > bestFx)
+						{
+							eliteMadeIt = true;
+						}
+					}
+					else
+					{
+						if (Fx < bestFx)
+						{
+							eliteMadeIt = true;
+						}
+					}
+				}
 			});
+
+
+			if (elite && !eliteMadeIt)
+			{
+				int index = Singleton.Random.Next(0, data.Length - 1);
+				data[index].ReplacedByElite = true;
+				data[index].MutatedChromosomeValue = MathHelper.XIntToXBin(eliteXInt);
+			}
 		}
 
 		[SuppressMessage("ReSharper.DPA", "DPA0001: Memory allocation issues")]
@@ -636,7 +660,7 @@ namespace INA_Generations
 					break;
 				case RouletteType.PieChart:
 					List<(Specimen OriginalSpecimen, string xBin_xInt, double Px)> chances =
-						data.Select(x => (x.OriginalSpecimen, x.OriginalSpecimen.xBin_xInt, x.PxValue)).ToList();
+						data.Select(x => (x.OriginalSpecimen, xBin_xInt: x.OriginalSpecimen.XBin, x.PxValue)).ToList();
 					foreach (var row in data)
 					{
 						var result = Singleton.GetRandomWithRoulette(chances);
@@ -672,14 +696,14 @@ namespace INA_Generations
 			switch (Singleton.TargetFunction)
 			{
 				case TargetFunction.Max:
-					double min = data.Min(x => x.OriginalSpecimen.FxReal);
+					double min = data.Min(x => x.OriginalSpecimen.Fx);
 					Parallel.ForEach(data,
-						dataRow => { dataRow.GxValue = dataRow.OriginalSpecimen.FxReal - min + Singleton.d; });
+						dataRow => { dataRow.GxValue = dataRow.OriginalSpecimen.Fx - min + Singleton.d; });
 					break;
 				case TargetFunction.Min:
-					double max = data.Max(x => x.OriginalSpecimen.FxReal);
+					double max = data.Max(x => x.OriginalSpecimen.Fx);
 					Parallel.ForEach(data,
-						dataRow => { dataRow.GxValue = -(dataRow.OriginalSpecimen.FxReal - max) + Singleton.d; });
+						dataRow => { dataRow.GxValue = -(dataRow.OriginalSpecimen.Fx - max) + Singleton.d; });
 
 					break;
 				default:
