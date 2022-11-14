@@ -51,9 +51,9 @@ namespace INA_Generations
 		private DropDown TargetFunctionDropdown;
 		private DropDown Analysis_TargetFunctionDropdown;
 
-		private Scrollable OutputTableScrollable;
-		private Scrollable GroupedOutputTableScrollable;
-		private Scrollable AnalysisOutputTableScrollable;
+		//private Scrollable OutputTableScrollable;
+		//private Scrollable GroupedOutputTableScrollable;
+		//private Scrollable AnalysisOutputTableScrollable;
 
 		const int inputsSeparation = 30;
 
@@ -86,7 +86,8 @@ namespace INA_Generations
 					{
 						Inputs,
 						SecondaryInputs,
-						OutputTableScrollable
+						//OutputTableScrollable
+						OutputTable
 					}
 				},
 				Text = "Populacja"
@@ -113,7 +114,8 @@ namespace INA_Generations
 					Padding = 10,
 					Items =
 					{
-						GroupedOutputTableScrollable
+						GroupedOutputTable
+						//GroupedOutputTableScrollable
 					}
 				},
 				Text = "Wyniki"
@@ -127,7 +129,8 @@ namespace INA_Generations
 					Items =
 					{
 						Analysis_Inputs,
-						AnalysisOutputTableScrollable
+						AnalysisOutputTable
+						//AnalysisOutputTableScrollable
 					}
 				},
 				Text = "Analiza"
@@ -157,17 +160,26 @@ namespace INA_Generations
 			{
 				if (OutputTable != null)
 				{
-					OutputTable.Width = Width - 40 - 30 - 30;
+					//OutputTable.Width = Width - 40 - 30 - 30;
+					
+					OutputTable.Width = Width - 40 - 30;
+					OutputTable.Height = Height - 180 - 20;
 				}
 
 				if (GroupedOutputTable != null)
 				{
-					GroupedOutputTable.Width = Width - 40 - 30 - 30;
+					//GroupedOutputTable.Width = Width - 40 - 30 - 30;
+					
+					GroupedOutputTable.Width = Width - 40 - 30;
+					GroupedOutputTable.Height = Height - 180 - 20;
 				}
 
 				if (AnalysisOutputTable != null)
 				{
-					AnalysisOutputTable.Width = Width - 40 - 30 - 30;
+					//AnalysisOutputTable.Width = Width - 40 - 30 - 30;
+					
+					AnalysisOutputTable.Width = Width - 40 - 30;
+					AnalysisOutputTable.Height = Height - 140 - 20;
 				}
 
 				if (Plot != null)
@@ -176,23 +188,23 @@ namespace INA_Generations
 					Plot.Height = Height - 200;
 				}
 
-				if (OutputTableScrollable != null)
-				{
-					OutputTableScrollable.Width = Width - 40 - 30;
-					OutputTableScrollable.Height = Height - 180 - 20;
-				}
+				// if (OutputTableScrollable != null)
+				// {
+				// 	OutputTableScrollable.Width = Width - 40 - 30;
+				// 	OutputTableScrollable.Height = Height - 180 - 20;
+				// }
 
-				if (GroupedOutputTableScrollable != null)
-				{
-					GroupedOutputTableScrollable.Width = Width - 40 - 30;
-					GroupedOutputTableScrollable.Height = Height - 180 - 20;
-				}
+				// if (GroupedOutputTableScrollable != null)
+				// {
+				// 	GroupedOutputTableScrollable.Width = Width - 40 - 30;
+				// 	GroupedOutputTableScrollable.Height = Height - 180 - 20;
+				// }
 
-				if (AnalysisOutputTableScrollable != null)
-				{
-					AnalysisOutputTableScrollable.Width = Width - 40 - 30;
-					AnalysisOutputTableScrollable.Height = Height - 140 - 20;
-				}
+				// if (AnalysisOutputTableScrollable != null)
+				// {
+				// 	AnalysisOutputTableScrollable.Width = Width - 40 - 30;
+				// 	AnalysisOutputTableScrollable.Height = Height - 140 - 20;
+				// }
 
 				if (TabsControl != null)
 				{
@@ -332,7 +344,8 @@ namespace INA_Generations
 						{
 							Inputs,
 							SecondaryInputs,
-							OutputTableScrollable
+							//OutputTableScrollable
+							OutputTable
 						}
 					};
 					break;
@@ -358,7 +371,8 @@ namespace INA_Generations
 						{
 							Inputs,
 							SecondaryInputs,
-							GroupedOutputTableScrollable
+							GroupedOutputTable
+							//GroupedOutputTableScrollable
 						}
 					};
 					break;
@@ -468,12 +482,12 @@ namespace INA_Generations
 				Width = Width - 42
 			};
 
-			OutputTableScrollable = new Scrollable()
-			{
-				Content = OutputTable,
-				Width = Width - 40,
-				Height = Height - 180
-			};
+			// OutputTableScrollable = new Scrollable()
+			// {
+			// 	Content = OutputTable,
+			// 	Width = Width - 40,
+			// 	Height = Height - 180
+			// };
 
 			foreach (PropertyInfo property in typeof(DataRow).GetProperties())
 			{
@@ -499,12 +513,12 @@ namespace INA_Generations
 				Width = Width - 42
 			};
 
-			GroupedOutputTableScrollable = new Scrollable()
-			{
-				Content = GroupedOutputTable,
-				Width = Width - 40,
-				Height = Height - 180
-			};
+			// GroupedOutputTableScrollable = new Scrollable()
+			// {
+			// 	Content = GroupedOutputTable,
+			// 	Width = Width - 40,
+			// 	Height = Height - 180
+			// };
 
 			foreach (PropertyInfo property in typeof(GroupDataRow).GetProperties())
 			{
@@ -530,12 +544,12 @@ namespace INA_Generations
 				Width = Width - 42
 			};
 
-			AnalysisOutputTableScrollable = new Scrollable()
-			{
-				Content = AnalysisOutputTable,
-				Width = Width - 40,
-				Height = Height - 180
-			};
+			// AnalysisOutputTableScrollable = new Scrollable()
+			// {
+			// 	Content = AnalysisOutputTable,
+			// 	Width = Width - 40,
+			// 	Height = Height - 180
+			// };
 
 			foreach (PropertyInfo property in typeof(AnalysisDataRow).GetProperties())
 			{

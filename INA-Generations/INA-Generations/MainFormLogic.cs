@@ -391,7 +391,10 @@ namespace INA_Generations
 			
 			AddGroupDataToTable(new GroupDataRow[]{new GroupDataRow(){xBinValue = "grupowanie odbywa się na osobnym wątku, chwilę trzeba poczekać"}});
 			GroupingCancellationToken = GroupingCancellationTokenSource.Token;
+			//Stopwatch grouping = Stopwatch.StartNew();
 			DataGrouping = Task.Run(() => GroupData(data, GroupingCancellationToken), GroupingCancellationToken); 
+			//grouping.Stop();
+			//MessageBox.Show($"grouping took: {grouping.ElapsedMilliseconds}");
 		}
 
 		class DataGroup : IComparer<DataGroup>, IComparable<DataGroup>
