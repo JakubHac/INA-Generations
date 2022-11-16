@@ -478,7 +478,7 @@ namespace INA_Generations
 					i++;
 				}
 
-				Application.Instance.Invoke(() => AddGroupDataToTable(Groups));
+				Application.Instance.InvokeAsync(() => AddGroupDataToTable(Groups));
 			}
 			catch (Exception e)
 			{
