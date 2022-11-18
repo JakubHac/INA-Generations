@@ -173,6 +173,116 @@ namespace INA_Generations
 			AddAnalysisDataToTable(analysisDataRows);
 		}
 
+
+		private void ExecuteClimbers()
+		{
+			if (!(
+				    ParseHelper.ParseDouble(Climbers_AInput.Text, "A", out double a) &&
+				    ParseHelper.ParseDouble(Climbers_BInput.Text, "B", out double b) &&
+				    ParseHelper.ParseDouble(Climbers_DInput.SelectedKey, "D", out double d, "en-US") &&
+				    ParseHelper.ParseLong(Climbers_TInput.Text, "T", out long t)
+			    )
+			   )
+			{
+				return;
+			}
+			
+			
+			Singleton.RandomRoulette = Climbers_RouletteTypeDropdown.SelectedKey switch
+			{
+				"Wyłączona" => RouletteType.Disabled,
+				"Zakres (0;1)" => RouletteType.Gradient,
+				"Koło Fortuny" => RouletteType.PieChart
+			};
+
+			Singleton.TargetFunction = Climbers_TargetFunctionDropdown.SelectedKey switch
+			{
+				"Maksimum" => TargetFunction.Max,
+				"Minimum" => TargetFunction.Min
+			};
+			
+			Singleton.a = a;
+			Singleton.b = b;
+			Singleton.d = d;
+			int l = (int)Math.Floor(Math.Log((b - a) / d, 2) + 1.0);
+			Singleton.l = l;
+
+			Specimen[] climbers = new Specimen[t];
+
+			for (int i = 0; i < t; i++)
+			{
+				bool local = false;
+				var Vc = new Specimen();
+				do
+				{
+					string[] neighbors = new string[l];
+					for (int j = 0; j < neighbors.Length; j++)
+					{
+						neighbors[j] = new string(Vc.XBin.Select((x, index) => index == j ? x == '0' ? '1' : '0' : x).ToArray());
+					}
+
+					double[] neighborsFx = new double[l];
+					for (int j = 0; j < neighbors.Length; j++)
+					{
+						neighborsFx[j] = MathHelper.Fx(MathHelper.XBinToXReal(neighbors[j]));
+					}
+
+					if (Singleton.TargetFunction == TargetFunction.Max)
+					{
+						double bestFx = Double.MinValue;
+						string bestNeighbor = "";
+						for (int j = 0; j < neighbors.Length; j++)
+						{
+							if (neighborsFx[j] > bestFx)
+							{
+								bestFx = neighborsFx[j];
+								bestNeighbor = neighbors[j];
+							}
+						}
+
+						if (bestFx > Vc.Fx)
+						{
+							Vc = new Specimen(bestNeighbor);
+						}
+						else
+						{
+							local = true;
+						}
+					}
+					else
+					{
+						double bestFx = Double.MaxValue;
+						string bestNeighbor = "";
+						for (int j = 0; j < neighbors.Length; j++)
+						{
+							if (neighborsFx[j] < bestFx)
+							{
+								bestFx = neighborsFx[j];
+								bestNeighbor = neighbors[j];
+							}
+						}
+
+						if (bestFx < Vc.Fx)
+						{
+							Vc = new Specimen(bestNeighbor);
+						}
+						else
+						{
+							local = true;
+						}
+					}
+				} while (!local);
+
+				climbers[i] = Vc;
+			}
+
+
+			ClimbersOutputTable.DataStore = climbers;
+		}
+		
+		
+		
+		
 		private void ExecuteGeneration()
 		{
 			if (!(

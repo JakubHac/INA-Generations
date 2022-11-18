@@ -13,17 +13,22 @@ namespace INA_Generations
 	{
 		private TextBox AInput;
 		private TextBox Analysis_AInput;
+		private TextBox Climbers_AInput;
 		private TextBox BInput;
 		private TextBox Analysis_BInput;
+		private TextBox Climbers_BInput;
 		private DropDown DInput;
 		private DropDown Analysis_DInput;
+		private DropDown Climbers_DInput;
 		private TextBox NInput;
 		private TextBox Analysis_NInput;
 		private Button StartButton;
 		private Button Analysis_StartButton;
+		private Button Climbers_StartButton;
 		private GridView OutputTable;
 		private GridView GroupedOutputTable;
 		private GridView AnalysisOutputTable;
+		private GridView ClimbersOutputTable;
 		private Label LOutput;
 		private Slider PKSlider;
 		private TextBox PKValue;
@@ -37,18 +42,23 @@ namespace INA_Generations
 		private TextBox TInput;
 		private TextBox Analysis_IterInput;
 		private TextBox Analysis_TInput;
+		private TextBox Climbers_TInput;
 		private TabControl TabsControl;
 		private TabPage RawDataPage;
 		private TabPage PlotPage;
 		private TabPage GroupedResultsPage;
 		private TabPage AnalysisResultsPage;
+		private TabPage ClimbersRawDataPage;
 		private PlotView Plot;
 		private StackLayout Inputs;
 		private StackLayout SecondaryInputs;
 		private StackLayout Analysis_Inputs;
+		private StackLayout Climbers_Inputs;
 
 		private DropDown RouletteTypeDropdown;
+		private DropDown Climbers_RouletteTypeDropdown;
 		private DropDown TargetFunctionDropdown;
+		private DropDown Climbers_TargetFunctionDropdown;
 		private DropDown Analysis_TargetFunctionDropdown;
 
 		//private Scrollable OutputTableScrollable;
@@ -69,9 +79,11 @@ namespace INA_Generations
 			Inputs = CreateInputs();
 			Analysis_Inputs = CreateAnalysisInputs();
 			SecondaryInputs = CreateSecondaryInputs();
+			Climbers_Inputs = CreateClimbersInputs();
 			CreateOutputTable();
 			CreateGroupedOutputTable();
 			CreateAnalysisOutputTable();
+			CreateClimbersOutputTable();
 			Plot = new PlotView();
 			Plot.Width = 600;
 			Plot.Height = 400;
@@ -135,12 +147,28 @@ namespace INA_Generations
 				},
 				Text = "Analiza"
 			};
+			
+			ClimbersRawDataPage = new TabPage()
+			{
+				Content = new StackLayout()
+				{
+					Orientation = Orientation.Vertical,
+					Padding = 10,
+					Items =
+					{
+						Climbers_Inputs,
+						ClimbersOutputTable
+						//AnalysisOutputTableScrollable
+					}
+				},
+				Text = "Wspinacze"
+			};
 
 			TabsControl = new TabControl()
 			{
 				Pages =
 				{
-					RawDataPage, PlotPage, GroupedResultsPage, AnalysisResultsPage
+					RawDataPage, PlotPage, GroupedResultsPage, AnalysisResultsPage, ClimbersRawDataPage
 				}
 			};
 
@@ -160,26 +188,26 @@ namespace INA_Generations
 			{
 				if (OutputTable != null)
 				{
-					//OutputTable.Width = Width - 40 - 30 - 30;
-					
 					OutputTable.Width = Width - 40 - 30;
 					OutputTable.Height = Height - 180 - 20;
 				}
 
 				if (GroupedOutputTable != null)
 				{
-					//GroupedOutputTable.Width = Width - 40 - 30 - 30;
-					
 					GroupedOutputTable.Width = Width - 40 - 30;
 					GroupedOutputTable.Height = Height - 180 - 20;
 				}
 
 				if (AnalysisOutputTable != null)
 				{
-					//AnalysisOutputTable.Width = Width - 40 - 30 - 30;
-					
 					AnalysisOutputTable.Width = Width - 40 - 30;
 					AnalysisOutputTable.Height = Height - 140 - 20;
+				}
+				
+				if (ClimbersOutputTable != null)
+				{
+					ClimbersOutputTable.Width = Width - 40 - 30;
+					ClimbersOutputTable.Height = Height - 140 - 20;
 				}
 
 				if (Plot != null)
@@ -188,28 +216,111 @@ namespace INA_Generations
 					Plot.Height = Height - 200;
 				}
 
-				// if (OutputTableScrollable != null)
-				// {
-				// 	OutputTableScrollable.Width = Width - 40 - 30;
-				// 	OutputTableScrollable.Height = Height - 180 - 20;
-				// }
-
-				// if (GroupedOutputTableScrollable != null)
-				// {
-				// 	GroupedOutputTableScrollable.Width = Width - 40 - 30;
-				// 	GroupedOutputTableScrollable.Height = Height - 180 - 20;
-				// }
-
-				// if (AnalysisOutputTableScrollable != null)
-				// {
-				// 	AnalysisOutputTableScrollable.Width = Width - 40 - 30;
-				// 	AnalysisOutputTableScrollable.Height = Height - 140 - 20;
-				// }
-
 				if (TabsControl != null)
 				{
 					TabsControl.Width = Width - 40;
 					TabsControl.Height = Height - 60;
+				}
+			};
+		}
+
+		private StackLayout CreateClimbersInputs()
+		{
+			Climbers_AInput = new TextBox()
+			{
+				Text = "-4",
+				Width = 40
+			};
+			Climbers_BInput = new TextBox()
+			{
+				Text = "12",
+				Width = 40
+			};
+			Climbers_DInput = new DropDown()
+			{
+				Items = { "1", "0.1", "0.01", "0.001" },
+				SelectedIndex = 3
+			};
+			Climbers_TInput = new TextBox()
+			{
+				Text = "100",
+				Width = 150
+			};
+			Climbers_StartButton = new Button()
+			{
+				Text = "Start",
+				Command = new Command((object sender, EventArgs e) => ExecuteClimbers())
+			};
+			Climbers_TargetFunctionDropdown = new DropDown()
+			{
+				Items = { "Maksimum", "Minimum" },
+				SelectedIndex = 0
+			};
+			Climbers_RouletteTypeDropdown = new DropDown()
+			{
+				Items = { "Wyłączona", "Zakres (0;1)", "Koło Fortuny" },
+				SelectedIndex = 0
+			};
+			
+			return new StackLayout()
+			{
+				Orientation = Orientation.Horizontal,
+				AlignLabels = true,
+				VerticalContentAlignment = VerticalAlignment.Center,
+				HorizontalContentAlignment = HorizontalAlignment.Center,
+				Padding = 10,
+				Items =
+				{
+					Label("A:"),
+					Climbers_AInput,
+					Label("B:"),
+					Climbers_BInput,
+					Label("D:"),
+					Climbers_DInput,
+					Label("T:"),
+					Climbers_TInput,
+					Label("Cel:"),
+					Climbers_TargetFunctionDropdown,
+					Label("Ruletka:"),
+					Climbers_RouletteTypeDropdown,
+					SeparationPanel(),
+					Climbers_StartButton
+				}
+			};
+		}
+
+		private void CreateClimbersOutputTable()
+		{
+			ClimbersOutputTable = new GridView()
+			{
+				DataStore = new Specimen[0],
+				Width = Width - 42,
+				Columns =
+				{
+					new GridColumn()
+					{
+						HeaderText = "xReal",
+						DataCell = new TextBoxCell()
+						{
+							Binding = Binding.Property<Specimen, string>(x => x.xReal.ToString())
+						}
+					},
+					new GridColumn()
+					{
+						HeaderText = "xBin",
+						DataCell = new TextBoxCell()
+						{
+							Binding = Binding.Property<Specimen, string>(x => x.XBin.ToString())
+						}
+					},
+					new GridColumn()
+					{
+						HeaderText = "F(x)",
+						DataCell = new TextBoxCell()
+						{
+							Binding = Binding.Property<Specimen, string>(x => x.Fx.ToString())
+						}
+					}
 				}
 			};
 		}
