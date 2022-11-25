@@ -593,11 +593,11 @@ namespace INA_Generations
 
 		private void CreateInitialData(DataRow[] data, long n)
 		{
-			for (int i = 0; i < n; i++)
+			Parallel.For(0, n, i =>
 			{
 				Specimen specimen = new Specimen();
 				data[i] = new DataRow(specimen, i + 1);
-			}
+			});
 		}
 
 		private void MoveDataToNextGeneration(DataRow[] data)
