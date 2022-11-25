@@ -5,6 +5,7 @@
       <list>
         <option value="$PROJECT_DIR$/INA-Generations/INA-Generations.Wpf/bin/Release/net60-windows/win-x64/publish" />
         <option value="$PROJECT_DIR$/INA-Generations/INA-Generations.Wpf/bin/Release/net6.0-windows/publish-dep" />
+        <option value="$PROJECT_DIR$/INA-Generations/INA-Generations.Wpf/bin/Release/net6.0-windows/win-x64/publish" />
       </list>
     </option>
   </component>

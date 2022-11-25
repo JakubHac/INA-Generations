@@ -281,8 +281,6 @@ namespace INA_Generations
 					Climbers_TInput,
 					Label("Cel:"),
 					Climbers_TargetFunctionDropdown,
-					Label("Ruletka:"),
-					Climbers_RouletteTypeDropdown,
 					SeparationPanel(),
 					Climbers_StartButton
 				}

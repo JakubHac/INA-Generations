@@ -187,14 +187,7 @@ namespace INA_Generations
 				return;
 			}
 			
-			
-			Singleton.RandomRoulette = Climbers_RouletteTypeDropdown.SelectedKey switch
-			{
-				"Wyłączona" => RouletteType.Disabled,
-				"Zakres (0;1)" => RouletteType.Gradient,
-				"Koło Fortuny" => RouletteType.PieChart
-			};
-
+			Singleton.RandomRoulette = RouletteType.Disabled;
 			Singleton.TargetFunction = Climbers_TargetFunctionDropdown.SelectedKey switch
 			{
 				"Maksimum" => TargetFunction.Max,
@@ -208,11 +201,11 @@ namespace INA_Generations
 			Singleton.l = l;
 
 			Specimen[] climbers = new Specimen[t];
+			bool local = false;
+			var Vc = new Specimen();
 
 			for (int i = 0; i < t; i++)
 			{
-				bool local = false;
-				var Vc = new Specimen();
 				do
 				{
 					string[] neighbors = new string[l];
@@ -277,7 +270,7 @@ namespace INA_Generations
 			}
 
 
-			ClimbersOutputTable.DataStore = climbers;
+			ClimbersOutputTable.DataStore = new Specimen[]{Vc};
 		}
 		
 		
