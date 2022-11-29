@@ -14,9 +14,9 @@ namespace INA_Generations
 		public static double PK = 0.5;
 		public static double PM = 0.5;
 
-		public static double a;
-		public static double b;
-		public static double d;
+		public static double a = -4;
+		public static double b = 12;
+		public static double d = 0.001;
 		public static int l;
 		
 		public static double RandomXReal()

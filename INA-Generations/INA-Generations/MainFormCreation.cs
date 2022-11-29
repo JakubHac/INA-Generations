@@ -25,10 +25,13 @@ namespace INA_Generations
 		private Button StartButton;
 		private Button Analysis_StartButton;
 		private Button Climbers_StartButton;
+		private StackLayout ClimbersOutputColumns;
 		private GridView OutputTable;
 		private GridView GroupedOutputTable;
 		private GridView AnalysisOutputTable;
 		private GridView ClimbersOutputTable;
+		private GridView ClimbersMultiOutputTable;
+		private bool ClimbersShowMultiOutputTable = false;
 		private Label LOutput;
 		private Slider PKSlider;
 		private TextBox PKValue;
@@ -56,7 +59,6 @@ namespace INA_Generations
 		private StackLayout Climbers_Inputs;
 
 		private DropDown RouletteTypeDropdown;
-		private DropDown Climbers_RouletteTypeDropdown;
 		private DropDown TargetFunctionDropdown;
 		private DropDown Climbers_TargetFunctionDropdown;
 		private DropDown Analysis_TargetFunctionDropdown;
@@ -84,6 +86,7 @@ namespace INA_Generations
 			CreateGroupedOutputTable();
 			CreateAnalysisOutputTable();
 			CreateClimbersOutputTable();
+			CreateClimbersMultiOutputTable();
 			Plot = new PlotView();
 			Plot.Width = 600;
 			Plot.Height = 400;
@@ -127,7 +130,6 @@ namespace INA_Generations
 					Items =
 					{
 						GroupedOutputTable
-						//GroupedOutputTableScrollable
 					}
 				},
 				Text = "Wyniki"
@@ -142,10 +144,20 @@ namespace INA_Generations
 					{
 						Analysis_Inputs,
 						AnalysisOutputTable
-						//AnalysisOutputTableScrollable
 					}
 				},
 				Text = "Analiza"
+			};
+
+			ClimbersOutputColumns = new StackLayout()
+			{
+				Orientation = Orientation.Horizontal,
+				Padding = 10,
+				Items =
+				{
+					ClimbersOutputTable,
+					ClimbersMultiOutputTable
+				}
 			};
 			
 			ClimbersRawDataPage = new TabPage()
@@ -157,8 +169,7 @@ namespace INA_Generations
 					Items =
 					{
 						Climbers_Inputs,
-						ClimbersOutputTable
-						//AnalysisOutputTableScrollable
+						ClimbersOutputColumns
 					}
 				},
 				Text = "Wspinacze"
@@ -184,42 +195,110 @@ namespace INA_Generations
 				}
 			};
 
-			this.SizeChanged += (sender, args) =>
+			this.SizeChanged += (sender, args) => { RefreshItemsSize(); };
+		}
+
+		private void RefreshItemsSize()
+		{
+			if (OutputTable != null)
 			{
-				if (OutputTable != null)
-				{
-					OutputTable.Width = Width - 40 - 30;
-					OutputTable.Height = Height - 180 - 20;
-				}
+				OutputTable.Width = Width - 40 - 30;
+				OutputTable.Height = Height - 180 - 20;
+			}
 
-				if (GroupedOutputTable != null)
-				{
-					GroupedOutputTable.Width = Width - 40 - 30;
-					GroupedOutputTable.Height = Height - 180 - 20;
-				}
+			if (GroupedOutputTable != null)
+			{
+				GroupedOutputTable.Width = Width - 40 - 30;
+				GroupedOutputTable.Height = Height - 180 - 20;
+			}
 
-				if (AnalysisOutputTable != null)
-				{
-					AnalysisOutputTable.Width = Width - 40 - 30;
-					AnalysisOutputTable.Height = Height - 140 - 20;
-				}
-				
-				if (ClimbersOutputTable != null)
-				{
-					ClimbersOutputTable.Width = Width - 40 - 30;
-					ClimbersOutputTable.Height = Height - 140 - 20;
-				}
+			if (AnalysisOutputTable != null)
+			{
+				AnalysisOutputTable.Width = Width - 40 - 30;
+				AnalysisOutputTable.Height = Height - 140 - 20;
+			}
 
-				if (Plot != null)
-				{
-					Plot.Width = Width - 40 - 30 - 30;
-					Plot.Height = Height - 200;
-				}
+			if (ClimbersOutputColumns != null)
+			{
+				ClimbersOutputTable.Width = Width - 70;
+				ClimbersOutputTable.Height = Height - 180;
+			}
+			
+			if (ClimbersOutputTable != null)
+			{
+				ClimbersOutputTable.Width = Convert.ToInt32((Width -70) / 2f) - 20;
+				ClimbersOutputTable.Height = Height - 180;
+				//ClimbersOutputTable.Visible = !ClimbersShowMultiOutputTable;
+			}
+			
+			if (ClimbersMultiOutputTable != null)
+			{
+				ClimbersMultiOutputTable.Width = Convert.ToInt32((Width -70) / 2f) - 20;
+				ClimbersMultiOutputTable.Height = Height - 180;
+				//ClimbersMultiOutputTable.Visible = ClimbersShowMultiOutputTable;
+			}
 
-				if (TabsControl != null)
+			if (Plot != null)
+			{
+				Plot.Width = Width - 40 - 30 - 30;
+				Plot.Height = Height - 200;
+			}
+
+			if (TabsControl != null)
+			{
+				TabsControl.Width = Width - 40;
+				TabsControl.Height = Height - 60;
+			}
+		}
+
+		private void CreateClimbersMultiOutputTable()
+		{
+			ClimbersMultiOutputTable = new GridView()
+			{
+				DataStore = new ObservableCollection<ClimbersOutput>(),
+				Width = Width - 42,
+				Columns =
 				{
-					TabsControl.Width = Width - 40;
-					TabsControl.Height = Height - 60;
+					new GridColumn()
+					{
+						HeaderText = "Kroki",
+						DataCell = new TextBoxCell()
+						{
+							Binding = Binding.Property<ClimbersOutput, string>(x => x.NumberOfSteps.ToString())
+						}
+					},
+					new GridColumn()
+					{
+						HeaderText = "Ilość Rozwiązań",
+						DataCell = new TextBoxCell()
+						{
+							Binding = Binding.Property<ClimbersOutput, string>(x => x.NumberOfSolutions.ToString())
+						}
+					},
+					new GridColumn()
+					{
+						HeaderText = "Procent Ilości Rozwiązań",
+						DataCell = new TextBoxCell()
+						{
+							Binding = Binding.Property<ClimbersOutput, string>(x => x.HitPercent.ToString("P"))
+						}
+					},
+					new GridColumn()
+					{
+						HeaderText = "Kumulatywna Ilość rozwiązań",
+						DataCell = new TextBoxCell()
+						{
+							Binding = Binding.Property<ClimbersOutput, string>(x => x.AggregateNumberOfSolutions.ToString())
+						}
+					},
+					new GridColumn()
+					{
+						HeaderText = "Kumulatywny Procent Rozwiązań",
+						DataCell = new TextBoxCell()
+						{
+							Binding = Binding.Property<ClimbersOutput, string>(x => x.AggregateHitPercent.ToString("P"))
+						}
+					}
 				}
 			};
 		}
@@ -256,12 +335,17 @@ namespace INA_Generations
 				Items = { "Maksimum", "Minimum" },
 				SelectedIndex = 0
 			};
-			Climbers_RouletteTypeDropdown = new DropDown()
-			{
-				Items = { "Wyłączona", "Zakres (0;1)", "Koło Fortuny" },
-				SelectedIndex = 0
-			};
-			
+			// Climbers_RouletteTypeDropdown = new DropDown()
+			// {
+			// 	Items = { "Wyłączona", "Zakres (0;1)", "Koło Fortuny" },
+			// 	SelectedIndex = 0
+			// };
+			// Climbers_ThresholdInput = new TextBox()
+			// {
+			// 	Text = "1.996",
+			// 	ToolTip = "Próg po którego przekroczeniu osobnik wspinacza zostaje uznany za rowiązanie"
+			// };
+
 			return new StackLayout()
 			{
 				Orientation = Orientation.Horizontal,
@@ -279,6 +363,8 @@ namespace INA_Generations
 					Climbers_DInput,
 					Label("T:"),
 					Climbers_TInput,
+					//Label("Próg:"),
+					//Climbers_ThresholdInput,
 					Label("Cel:"),
 					Climbers_TargetFunctionDropdown,
 					SeparationPanel(),
@@ -287,11 +373,11 @@ namespace INA_Generations
 			};
 		}
 
-		private void CreateClimbersOutputTable()
+		public void CreateClimbersOutputTable()
 		{
 			ClimbersOutputTable = new GridView()
 			{
-				DataStore = new Specimen[0],
+				DataStore = new ObservableCollection<Specimen>() {new Specimen()},
 				Width = Width - 42,
 				Columns =
 				{
@@ -345,16 +431,18 @@ namespace INA_Generations
 				Text = "",
 				Width = 150
 			};
-			
-			for (int pk = 50; pk <= 90; pk+=10)
+
+			for (int pk = 50; pk <= 90; pk += 10)
 			{
-				Analysis_PKValue.Text += $";{(((double)pk)/100.0)}";
+				Analysis_PKValue.Text += $";{(((double)pk) / 100.0)}";
 			}
+
 			Analysis_PKValue.Text = Analysis_PKValue.Text.Substring(1);
-			
+
 			Analysis_PMValue = new TextBox()
 			{
-				Text = $"{0.0001.ToString("0.0000")};{0.0005.ToString("0.0000")};{0.001.ToString("0.000")};{0.005.ToString("0.000")};{0.01.ToString("0.00")};{0.05.ToString("0.00")}",
+				Text =
+					$"{0.0001.ToString("0.0000")};{0.0005.ToString("0.0000")};{0.001.ToString("0.000")};{0.005.ToString("0.000")};{0.01.ToString("0.00")};{0.05.ToString("0.00")}",
 				Width = 150
 			};
 			Analysis_NInput = new TextBox()
@@ -363,23 +451,25 @@ namespace INA_Generations
 				Width = 150
 			};
 
-			for (int n = 30; n <= 80; n+=10)
+			for (int n = 30; n <= 80; n += 10)
 			{
 				Analysis_NInput.Text += $";{n}";
 			}
+
 			Analysis_NInput.Text = Analysis_NInput.Text.Substring(1);
-			
+
 			Analysis_TInput = new TextBox()
 			{
 				Text = "",
 				Width = 150
 			};
-			for (int t = 50; t <= 150; t+=10)
+			for (int t = 50; t <= 150; t += 10)
 			{
 				Analysis_TInput.Text += $";{t}";
 			}
+
 			Analysis_TInput.Text = Analysis_TInput.Text.Substring(1);
-			
+
 			Analysis_IterInput = new TextBox()
 			{
 				Text = "100",
@@ -403,7 +493,7 @@ namespace INA_Generations
 				Checked = true,
 				ThreeState = false
 			};
-			
+
 			return new StackLayout()
 			{
 				Orientation = Orientation.Horizontal,
@@ -431,7 +521,7 @@ namespace INA_Generations
 					Analysis_NInput,
 					Label("T[]:"),
 					Analysis_TInput,
-					Label("Iters:", 
+					Label("Iters:",
 						"Ilość iteracji dla każdej permutacji parametrów\nz których wynik jest brany jako wartość średnia\nżeby zredukować wpływ \"szczęścia\" na wynik"),
 					Analysis_IterInput,
 					Analysis_StartButton

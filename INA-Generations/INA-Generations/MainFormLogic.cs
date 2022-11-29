@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
@@ -172,8 +173,7 @@ namespace INA_Generations
 
 			AddAnalysisDataToTable(analysisDataRows);
 		}
-
-
+		
 		private void ExecuteClimbers()
 		{
 			if (!(
@@ -200,12 +200,17 @@ namespace INA_Generations
 			int l = (int)Math.Floor(Math.Log((b - a) / d, 2) + 1.0);
 			Singleton.l = l;
 
-			Specimen[] climbers = new Specimen[t];
+			List<Specimen> climbers = new List<Specimen>();
+			Dictionary<long, long> StepsToSolutionsDict = new Dictionary<long, long>();
 			bool local = false;
-			var Vc = new Specimen();
-
 			for (int i = 0; i < t; i++)
 			{
+				Specimen Vc = new Specimen();
+				long steps = 0;
+				if (t <= 1)
+				{
+					climbers.Add(Vc);
+				}
 				do
 				{
 					string[] neighbors = new string[l];
@@ -235,7 +240,12 @@ namespace INA_Generations
 
 						if (bestFx > Vc.Fx)
 						{
+							steps++;
 							Vc = new Specimen(bestNeighbor);
+							if (t <= 1)
+							{
+								climbers.Add(Vc);
+							}
 						}
 						else
 						{
@@ -258,6 +268,10 @@ namespace INA_Generations
 						if (bestFx < Vc.Fx)
 						{
 							Vc = new Specimen(bestNeighbor);
+							if (t <= 1)
+							{
+								climbers.Add(Vc);
+							}
 						}
 						else
 						{
@@ -266,15 +280,63 @@ namespace INA_Generations
 					}
 				} while (!local);
 
-				climbers[i] = Vc;
+				if (t > 1)
+				{
+					if (StepsToSolutionsDict.ContainsKey(steps))
+					{
+						StepsToSolutionsDict[steps]++;
+					}
+					else
+					{
+						StepsToSolutionsDict.Add(steps, 1);
+					}
+					climbers.Add(Vc);
+				}
 			}
 
+			
 
-			ClimbersOutputTable.DataStore = new Specimen[]{Vc};
+			if (t <= 1)
+			{
+				ObservableCollection<Specimen> dataStore = (ObservableCollection<Specimen>)ClimbersOutputTable.DataStore;
+				dataStore.Clear();
+				foreach (var specimen in climbers)
+				{
+					dataStore.Add(specimen);
+				}
+			}
+			else
+			{
+				long maxSteps = StepsToSolutionsDict.Max(x => x.Key);
+				long aggregateSum = 0;
+				var Solutions = new List<ClimbersOutput>();
+				
+				for (long i = 0; i < maxSteps; i++)
+				{
+					if (StepsToSolutionsDict.ContainsKey(i))
+					{
+						long solutions = StepsToSolutionsDict[i];
+						aggregateSum += solutions;
+						double hitPercent = (double)solutions / (double)t;
+						double aggregateHitPercent = (double)aggregateSum / (double)t;
+					
+						Solutions.Add(new ClimbersOutput(i, solutions, aggregateSum, hitPercent, aggregateHitPercent));
+					}
+					else
+					{
+						double aggregateHitPercent = (double)aggregateSum / (double)t;
+						Solutions.Add(new ClimbersOutput(i, 0, aggregateSum,0, aggregateHitPercent));
+					}
+				}
+				
+				ObservableCollection<ClimbersOutput> dataStore = (ObservableCollection<ClimbersOutput>)ClimbersMultiOutputTable.DataStore;
+				dataStore.Clear();
+				foreach (var climbersOutput in Solutions)
+				{
+					dataStore.Add(climbersOutput);
+				}
+			}
 		}
-		
-		
-		
 		
 		private void ExecuteGeneration()
 		{
