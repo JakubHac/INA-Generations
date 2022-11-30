@@ -294,16 +294,30 @@ namespace INA_Generations
 				}
 			}
 
-			
+			ClimbersPlot.Reset();
 
 			if (t <= 1)
 			{
+				SignalPlot ClimbersSingleIterPlot = new SignalPlot();
+				ClimbersSingleIterPlot.Color = Color.LawnGreen;
+				ClimbersSingleIterPlot.FillBelow(Color.Lime, 1f);
+				ClimbersSingleIterPlot.SampleRate = 1;
+				ClimbersSingleIterPlot.MinRenderIndex = 0;
+				ClimbersPlot.Plot.Add(ClimbersSingleIterPlot);
+				List<double> PlotData = new List<double>();
 				ObservableCollection<Specimen> dataStore = (ObservableCollection<Specimen>)ClimbersOutputTable.DataStore;
 				dataStore.Clear();
 				foreach (var specimen in climbers)
 				{
 					dataStore.Add(specimen);
+					PlotData.Add(specimen.Fx);
 				}
+				
+				ClimbersSingleIterPlot.Ys = PlotData.ToArray();
+				ClimbersSingleIterPlot.MaxRenderIndex = ClimbersSingleIterPlot.PointCount - 1;
+				
+				ClimbersOutputTable.Visible = true;
+				ClimbersMultiOutputTable.Visible = false;
 			}
 			else
 			{
@@ -311,7 +325,11 @@ namespace INA_Generations
 				long aggregateSum = 0;
 				var Solutions = new List<ClimbersOutput>();
 				
-				for (long i = 0; i < maxSteps; i++)
+				List<double> PlotData = new List<double>();
+				
+				
+				
+				for (long i = 0; i <= maxSteps; i++)
 				{
 					if (StepsToSolutionsDict.ContainsKey(i))
 					{
@@ -335,7 +353,21 @@ namespace INA_Generations
 				{
 					dataStore.Add(climbersOutput);
 				}
+				
+				ClimbersOutputTable.Visible = false;
+				ClimbersMultiOutputTable.Visible = true;
+				
+				SignalPlot ClimbersSingleIterPlot = new SignalPlot();
+				ClimbersSingleIterPlot.Color = Color.Goldenrod;
+				ClimbersSingleIterPlot.SampleRate = 1;
+				ClimbersSingleIterPlot.MinRenderIndex = 0;
+				ClimbersPlot.Plot.Add(ClimbersSingleIterPlot);
+				
 			}
+			
+			ClimbersPlot.Plot.AxisAuto(0.05f, 0.1f);
+			ClimbersPlot.Refresh();
+			
 		}
 		
 		private void ExecuteGeneration()
