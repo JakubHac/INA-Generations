@@ -325,9 +325,7 @@ namespace INA_Generations
 				long aggregateSum = 0;
 				var Solutions = new List<ClimbersOutput>();
 				
-				List<double> PlotData = new List<double>();
-				
-				
+				// List<double> PlotData = new List<double>();
 				
 				for (long i = 0; i <= maxSteps; i++)
 				{
@@ -357,11 +355,11 @@ namespace INA_Generations
 				ClimbersOutputTable.Visible = false;
 				ClimbersMultiOutputTable.Visible = true;
 				
-				SignalPlot ClimbersSingleIterPlot = new SignalPlot();
-				ClimbersSingleIterPlot.Color = Color.Goldenrod;
-				ClimbersSingleIterPlot.SampleRate = 1;
-				ClimbersSingleIterPlot.MinRenderIndex = 0;
-				ClimbersPlot.Plot.Add(ClimbersSingleIterPlot);
+				// SignalPlot ClimbersSingleIterPlot = new SignalPlot();
+				// ClimbersSingleIterPlot.Color = Color.Goldenrod;
+				// ClimbersSingleIterPlot.SampleRate = 1;
+				// ClimbersSingleIterPlot.MinRenderIndex = 0;
+				// ClimbersPlot.Plot.Add(ClimbersSingleIterPlot);
 				
 			}
 			

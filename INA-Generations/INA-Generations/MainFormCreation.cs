@@ -59,8 +59,7 @@ namespace INA_Generations
         private StackLayout SecondaryInputs;
         private StackLayout Analysis_Inputs;
         private StackLayout Climbers_Inputs;
-
-
+        
         private DropDown RouletteTypeDropdown;
         private DropDown TargetFunctionDropdown;
         private DropDown Climbers_TargetFunctionDropdown;
