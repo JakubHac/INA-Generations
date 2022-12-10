@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
@@ -14,360 +13,6 @@ namespace INA_Generations
 {
 	public partial class MainForm
 	{
-		private Task DataGrouping = null;
-		private CancellationToken GroupingCancellationToken = CancellationToken.None;
-		private CancellationTokenSource GroupingCancellationTokenSource = new CancellationTokenSource();
-
-		private void StartAnalysis()
-		{
-			if (!(ParseHelper.ParseDouble(Analysis_AInput.Text, "A", out double a) &&
-			      ParseHelper.ParseDouble(Analysis_BInput.Text, "B", out double b) &&
-			      ParseHelper.ParseDouble(Analysis_DInput.SelectedKey, "D", out double d, "en-US") &&
-			      ParseHelper.ParseLong(Analysis_IterInput.Text, "Iter", out long iters)
-			    ))
-			{
-				return;
-			}
-
-			long[] Ns = Array.Empty<long>();
-			try
-			{
-				Ns = Analysis_NInput.Text.Split(';').Where(x => x.Trim().Length > 0).Select(x =>
-				{
-					ParseHelper.ParseLong(x, "N", out long n);
-					return n;
-				}).ToArray();
-			}
-			catch (Exception e)
-			{
-				MessageBox.Show(
-					$"Błąd przy interpretacji N, powinny być wartości rozdzielane ; np. {10} ; {20} ; {30}");
-				return;
-			}
-
-			long[] Ts = Array.Empty<long>();
-			try
-			{
-				Ts = Analysis_TInput.Text.Split(';').Where(x => x.Trim().Length > 0).Select(x =>
-				{
-					ParseHelper.ParseLong(x, "T", out long n);
-					return n;
-				}).ToArray();
-			}
-			catch (Exception e)
-			{
-				MessageBox.Show(
-					$"Błąd przy interpretacji T, powinny być wartości rozdzielane ; np. {10} ; {20} ; {30}");
-				return;
-			}
-
-			double[] PKs = Array.Empty<double>();
-			try
-			{
-				PKs = Analysis_PKValue.Text.Split(';').Where(x => x.Trim().Length > 0).Select(x =>
-				{
-					ParseHelper.ParseDouble(x, "PK", out double pk);
-					return pk;
-				}).ToArray();
-			}
-			catch (Exception e)
-			{
-				MessageBox.Show($"Błąd przy interpretacji PK, powinny być wartości rozdzielane ; np. {0.8} ; {0.5}");
-				return;
-			}
-
-			double[] PMs = Array.Empty<double>();
-			try
-			{
-				PMs = Analysis_PMValue.Text.Split(';').Where(x => x.Trim().Length > 0).Select(x =>
-				{
-					ParseHelper.ParseDouble(x, "PM", out double pm);
-					return pm;
-				}).ToArray();
-			}
-			catch (Exception e)
-			{
-				MessageBox.Show($"Błąd przy interpretacji PM, powinny być wartości rozdzielane ; np. {0.1} ; {0.01}");
-				return;
-			}
-
-			Singleton.RandomRoulette = RouletteType.Disabled;
-			Singleton.TargetFunction = TargetFunctionDropdown.SelectedKey switch
-			{
-				"Maksimum" => TargetFunction.Max,
-				"Minimum" => TargetFunction.Min
-			};
-
-			List<AnalysisDataRow> analysisDataRows = new List<AnalysisDataRow>();
-
-			bool elite = Analysis_EliteCheckbox.Checked.Value;
-			Singleton.d = d;
-			Singleton.a = a;
-			Singleton.b = b;
-			int l = (int)Math.Floor(Math.Log((b - a) / d, 2) + 1.0);
-			Singleton.l = l;
-
-			ClearAnalysisOutputTable();
-
-			for (long n = 0; n < Ns.Length; n++)
-			{
-				for (long t = 0; t < Ts.Length; t++)
-				{
-					for (long pk = 0; pk < PKs.Length; pk++)
-					{
-						Singleton.PK = PKs[pk];
-						for (long pm = 0; pm < PMs.Length; pm++)
-						{
-							Singleton.PM = PMs[pm];
-							List<double> FXs = new List<double>();
-							for (long i = 0; i < iters; i++)
-							{
-								DataRow[] data = new DataRow[Ns[n]];
-								CreateInitialData(data, Ns[n]);
-
-								for (int j = 0; j < Ts[t]; j++)
-								{
-									CalculateGx(data);
-									CalculatePx(data);
-									CalculateQx(data);
-									Selection(data);
-									Parenting(data);
-									PairParents(data);
-									RandomizePC(data);
-									Fuck(data);
-									Mutate(data, elite);
-									Finalize(data);
-
-									if (j + 1 < Ts[t])
-									{
-										MoveDataToNextGeneration(data);
-									}
-								}
-
-								FXs.Add(data.Average(x => x.FinalFxRealValue));
-							}
-
-							analysisDataRows.Add(new AnalysisDataRow()
-							{
-								NValue = Ns[n],
-								TValue = Ts[t],
-								PKValue = PKs[pk],
-								PMValue = PMs[pm],
-								AvgFXValue = FXs.Average()
-							});
-						}
-					}
-				}
-			}
-
-			if (Singleton.TargetFunction == TargetFunction.Max)
-			{
-				analysisDataRows = analysisDataRows.OrderByDescending(x => x.AvgFXValue)
-					.ThenBy(x => x.NValue * x.TValue).ToList();
-			}
-			else
-			{
-				analysisDataRows = analysisDataRows.OrderBy(x => x.AvgFXValue).ThenBy(x => x.NValue * x.TValue)
-					.ToList();
-			}
-
-			AddAnalysisDataToTable(analysisDataRows);
-		}
-		
-		private void ExecuteClimbers()
-		{
-			if (!(
-				    ParseHelper.ParseDouble(Climbers_AInput.Text, "A", out double a) &&
-				    ParseHelper.ParseDouble(Climbers_BInput.Text, "B", out double b) &&
-				    ParseHelper.ParseDouble(Climbers_DInput.SelectedKey, "D", out double d, "en-US") &&
-				    ParseHelper.ParseLong(Climbers_TInput.Text, "T", out long t)
-			    )
-			   )
-			{
-				return;
-			}
-			
-			Singleton.RandomRoulette = RouletteType.Disabled;
-			Singleton.TargetFunction = Climbers_TargetFunctionDropdown.SelectedKey switch
-			{
-				"Maksimum" => TargetFunction.Max,
-				"Minimum" => TargetFunction.Min
-			};
-			
-			Singleton.a = a;
-			Singleton.b = b;
-			Singleton.d = d;
-			int l = (int)Math.Floor(Math.Log((b - a) / d, 2) + 1.0);
-			Singleton.l = l;
-
-			List<Specimen> climbers = new List<Specimen>();
-			Dictionary<long, long> StepsToSolutionsDict = new Dictionary<long, long>();
-			bool local = false;
-			for (int i = 0; i < t; i++)
-			{
-				Specimen Vc = new Specimen();
-				long steps = 0;
-				if (t <= 1)
-				{
-					climbers.Add(Vc);
-				}
-				do
-				{
-					string[] neighbors = new string[l];
-					for (int j = 0; j < neighbors.Length; j++)
-					{
-						neighbors[j] = new string(Vc.XBin.Select((x, index) => index == j ? x == '0' ? '1' : '0' : x).ToArray());
-					}
-
-					double[] neighborsFx = new double[l];
-					for (int j = 0; j < neighbors.Length; j++)
-					{
-						neighborsFx[j] = MathHelper.Fx(MathHelper.XBinToXReal(neighbors[j]));
-					}
-
-					if (Singleton.TargetFunction == TargetFunction.Max)
-					{
-						double bestFx = Double.MinValue;
-						string bestNeighbor = "";
-						for (int j = 0; j < neighbors.Length; j++)
-						{
-							if (neighborsFx[j] > bestFx)
-							{
-								bestFx = neighborsFx[j];
-								bestNeighbor = neighbors[j];
-							}
-						}
-
-						if (bestFx > Vc.Fx)
-						{
-							steps++;
-							Vc = new Specimen(bestNeighbor);
-							if (t <= 1)
-							{
-								climbers.Add(Vc);
-							}
-						}
-						else
-						{
-							local = true;
-						}
-					}
-					else
-					{
-						double bestFx = Double.MaxValue;
-						string bestNeighbor = "";
-						for (int j = 0; j < neighbors.Length; j++)
-						{
-							if (neighborsFx[j] < bestFx)
-							{
-								bestFx = neighborsFx[j];
-								bestNeighbor = neighbors[j];
-							}
-						}
-
-						if (bestFx < Vc.Fx)
-						{
-							Vc = new Specimen(bestNeighbor);
-							if (t <= 1)
-							{
-								climbers.Add(Vc);
-							}
-						}
-						else
-						{
-							local = true;
-						}
-					}
-				} while (!local);
-
-				if (t > 1)
-				{
-					if (StepsToSolutionsDict.ContainsKey(steps))
-					{
-						StepsToSolutionsDict[steps]++;
-					}
-					else
-					{
-						StepsToSolutionsDict.Add(steps, 1);
-					}
-					climbers.Add(Vc);
-				}
-			}
-
-			ClimbersPlot.Reset();
-
-			if (t <= 1)
-			{
-				SignalPlot ClimbersSingleIterPlot = new SignalPlot();
-				ClimbersSingleIterPlot.Color = Color.LawnGreen;
-				ClimbersSingleIterPlot.FillBelow(Color.Lime, 1f);
-				ClimbersSingleIterPlot.SampleRate = 1;
-				ClimbersSingleIterPlot.MinRenderIndex = 0;
-				ClimbersPlot.Plot.Add(ClimbersSingleIterPlot);
-				List<double> PlotData = new List<double>();
-				ObservableCollection<Specimen> dataStore = (ObservableCollection<Specimen>)ClimbersOutputTable.DataStore;
-				dataStore.Clear();
-				foreach (var specimen in climbers)
-				{
-					dataStore.Add(specimen);
-					PlotData.Add(specimen.Fx);
-				}
-				
-				ClimbersSingleIterPlot.Ys = PlotData.ToArray();
-				ClimbersSingleIterPlot.MaxRenderIndex = ClimbersSingleIterPlot.PointCount - 1;
-				
-				ClimbersOutputTable.Visible = true;
-				ClimbersMultiOutputTable.Visible = false;
-			}
-			else
-			{
-				long maxSteps = StepsToSolutionsDict.Max(x => x.Key);
-				long aggregateSum = 0;
-				var Solutions = new List<ClimbersOutput>();
-				
-				// List<double> PlotData = new List<double>();
-				
-				for (long i = 0; i <= maxSteps; i++)
-				{
-					if (StepsToSolutionsDict.ContainsKey(i))
-					{
-						long solutions = StepsToSolutionsDict[i];
-						aggregateSum += solutions;
-						double hitPercent = (double)solutions / (double)t;
-						double aggregateHitPercent = (double)aggregateSum / (double)t;
-					
-						Solutions.Add(new ClimbersOutput(i, solutions, aggregateSum, hitPercent, aggregateHitPercent));
-					}
-					else
-					{
-						double aggregateHitPercent = (double)aggregateSum / (double)t;
-						Solutions.Add(new ClimbersOutput(i, 0, aggregateSum,0, aggregateHitPercent));
-					}
-				}
-				
-				ObservableCollection<ClimbersOutput> dataStore = (ObservableCollection<ClimbersOutput>)ClimbersMultiOutputTable.DataStore;
-				dataStore.Clear();
-				foreach (var climbersOutput in Solutions)
-				{
-					dataStore.Add(climbersOutput);
-				}
-				
-				ClimbersOutputTable.Visible = false;
-				ClimbersMultiOutputTable.Visible = true;
-				
-				// SignalPlot ClimbersSingleIterPlot = new SignalPlot();
-				// ClimbersSingleIterPlot.Color = Color.Goldenrod;
-				// ClimbersSingleIterPlot.SampleRate = 1;
-				// ClimbersSingleIterPlot.MinRenderIndex = 0;
-				// ClimbersPlot.Plot.Add(ClimbersSingleIterPlot);
-				
-			}
-			
-			ClimbersPlot.Plot.AxisAuto(0.05f, 0.1f);
-			ClimbersPlot.Refresh();
-			
-		}
-		
 		private void ExecuteGeneration()
 		{
 			if (!(
@@ -396,7 +41,7 @@ namespace INA_Generations
 
 			SyncPKValueToSlider();
 			SyncPMValueToSlider();
-			
+
 			GroupingCancellationTokenSource.Cancel();
 			GroupingCancellationTokenSource = new CancellationTokenSource();
 			GroupingCancellationToken = CancellationToken.None;
@@ -441,32 +86,7 @@ namespace INA_Generations
 				benchmarks = $"Creating Random Data: {benchmark.ElapsedMilliseconds}[ms]\n";
 			}
 
-			List<double> MinFx = new List<double>();
-			List<double> MaxFx = new List<double>();
-			List<double> AvgFx = new List<double>();
-			MinFx.Add(data.Min(x => x.OriginalSpecimen.Fx));
-			MaxFx.Add(data.Max(x => x.OriginalSpecimen.Fx));
-			AvgFx.Add(data.Average(x => x.OriginalSpecimen.Fx));
-			Plot.Reset();
-			SignalPlot MinGxPlot = new SignalPlot();
-			MinGxPlot.Color = Color.Red;
-			MinGxPlot.FillBelow(Color.Crimson, 1f);
-			MinGxPlot.SampleRate = 1;
-			MinGxPlot.MinRenderIndex = 0;
-			SignalPlot AvgGxPlot = new SignalPlot();
-			AvgGxPlot.Color = Color.DodgerBlue;
-			AvgGxPlot.FillBelow(Color.Turquoise, 1f);
-			AvgGxPlot.SampleRate = 1;
-			AvgGxPlot.MinRenderIndex = 0;
-			SignalPlot MaxGxPlot = new SignalPlot();
-			MaxGxPlot.Color = Color.LawnGreen;
-			MaxGxPlot.FillBelow(Color.Lime, 1f);
-			MaxGxPlot.SampleRate = 1;
-			MaxGxPlot.MinRenderIndex = 0;
-
-			Plot.Plot.Add(MaxGxPlot);
-			Plot.Plot.Add(AvgGxPlot);
-			Plot.Plot.Add(MinGxPlot);
+			InitPlot(data, out var MinFx, out var MaxFx, out var AvgFx, out var MinGxPlot, out var AvgGxPlot, out var MaxGxPlot);
 
 			if (addDataAtStart)
 			{
@@ -560,7 +180,7 @@ namespace INA_Generations
 			{
 				AddDataToTable(data);
 			}
-			
+
 			MinGxPlot.Ys = MinFx.ToArray();
 			MinGxPlot.MaxRenderIndex = MinGxPlot.PointCount - 1;
 			MaxGxPlot.Ys = MaxFx.ToArray();
@@ -583,13 +203,44 @@ namespace INA_Generations
 			{
 				MessageBox.Show(benchmarks, "Benchmark Results", MessageBoxType.Question);
 			}
-			
-			AddGroupDataToTable(new GroupDataRow[]{new GroupDataRow(){xBinValue = "grupowanie odbywa się na osobnym wątku, chwilę trzeba poczekać"}});
+
+			AddGroupDataToTable(new GroupDataRow[]
+			{
+				new GroupDataRow() { xBinValue = "grupowanie odbywa się na osobnym wątku, chwilę trzeba poczekać" }
+			});
 			GroupingCancellationToken = GroupingCancellationTokenSource.Token;
-			//Stopwatch grouping = Stopwatch.StartNew();
-			DataGrouping = Task.Run(() => GroupData(data, GroupingCancellationToken), GroupingCancellationToken); 
-			//grouping.Stop();
-			//MessageBox.Show($"grouping took: {grouping.ElapsedMilliseconds}");
+			Task.Run(() => GroupData(data, GroupingCancellationToken), GroupingCancellationToken);
+			
+			void InitPlot(DataRow[] data, out List<double> MinFx, out List<double> MaxFx, out List<double> AvgFx, out SignalPlot MinGxPlot,
+				out SignalPlot AvgGxPlot, out SignalPlot MaxGxPlot)
+			{
+				MinFx = new List<double>();
+				MaxFx = new List<double>();
+				AvgFx = new List<double>();
+				MinFx.Add(data.Min(x => x.OriginalSpecimen.Fx));
+				MaxFx.Add(data.Max(x => x.OriginalSpecimen.Fx));
+				AvgFx.Add(data.Average(x => x.OriginalSpecimen.Fx));
+				Plot.Reset();
+				MinGxPlot = new SignalPlot();
+				MinGxPlot.Color = Color.Red;
+				MinGxPlot.FillBelow(Color.Crimson, 1f);
+				MinGxPlot.SampleRate = 1;
+				MinGxPlot.MinRenderIndex = 0;
+				AvgGxPlot = new SignalPlot();
+				AvgGxPlot.Color = Color.DodgerBlue;
+				AvgGxPlot.FillBelow(Color.Turquoise, 1f);
+				AvgGxPlot.SampleRate = 1;
+				AvgGxPlot.MinRenderIndex = 0;
+				MaxGxPlot = new SignalPlot();
+				MaxGxPlot.Color = Color.LawnGreen;
+				MaxGxPlot.FillBelow(Color.Lime, 1f);
+				MaxGxPlot.SampleRate = 1;
+				MaxGxPlot.MinRenderIndex = 0;
+
+				Plot.Plot.Add(MaxGxPlot);
+				Plot.Plot.Add(AvgGxPlot);
+				Plot.Plot.Add(MinGxPlot);
+			}
 		}
 
 		class DataGroup : IComparer<DataGroup>, IComparable<DataGroup>
@@ -632,6 +283,7 @@ namespace INA_Generations
 					{
 						return;
 					}
+
 					if (XRealCounts.ContainsKey(dataRow.FinalXRealValue))
 					{
 						XRealCounts[dataRow.FinalXRealValue]++;
@@ -652,6 +304,7 @@ namespace INA_Generations
 					{
 						return;
 					}
+
 					sortedGroups.Add(new DataGroup(xRealCount.Key, xRealCount.Value / dataCountAsDouble,
 						MathHelper.Fx(xRealCount.Key)));
 				}
@@ -669,6 +322,7 @@ namespace INA_Generations
 					{
 						return;
 					}
+
 					Groups[i] = new GroupDataRow(i + 1, group.XReal, group.Percent);
 					i++;
 				}
@@ -678,9 +332,7 @@ namespace INA_Generations
 			catch (Exception e)
 			{
 				MessageBox.Show($"Error while grouping: {e}");
-				DataGrouping = null;
 			}
-			
 		}
 
 		private void CreateInitialData(DataRow[] data, long n)
@@ -699,7 +351,7 @@ namespace INA_Generations
 				data[i] = new DataRow(new Specimen(data[i].FinalXRealValue), data[i].Index);
 			}
 		}
-
+		
 		private void Finalize(DataRow[] data)
 		{
 			Parallel.ForEach(data, row =>
@@ -715,16 +367,7 @@ namespace INA_Generations
 			double bestFx = 0;
 			if (elite)
 			{
-				double bestGX = Double.MinValue;
-				foreach (var row in data)
-				{
-					if (row.GxValue > bestGX)
-					{
-						eliteXInt = row.OriginalSpecimen.XInt;
-						bestGX = row.GxValue;
-						bestFx = row.OriginalSpecimen.Fx;
-					}
-				}
+				eliteXInt = FindElite(data, eliteXInt, ref bestFx);
 			}
 
 			bool eliteMadeIt = !elite;
@@ -744,41 +387,67 @@ namespace INA_Generations
 
 				string xBin = new string(chromosome);
 				dataRow.MutatedChromosomeValue = xBin;
-				if (!eliteMadeIt)
-				{
-					long xInt = MathHelper.XBinToXInt(xBin);
-					if (xInt == eliteXInt)
-					{
-						eliteMadeIt = true;
-						return;
-					}
-
-					double xReal = MathHelper.XIntToXReal(xInt);
-					double Fx = MathHelper.Fx(xReal);
-					if (Singleton.TargetFunction == TargetFunction.Max)
-					{
-						if (Fx > bestFx)
-						{
-							eliteMadeIt = true;
-						}
-					}
-					else
-					{
-						if (Fx < bestFx)
-						{
-							eliteMadeIt = true;
-						}
-					}
-				}
+				eliteMadeIt = CheckIfEliteAlreadyMadeIt(eliteMadeIt, xBin, eliteXInt, bestFx);
 			});
 
 
-			if (elite && !eliteMadeIt)
+			ReplaceWithEliteIfNecessary(data, elite, eliteMadeIt, eliteXInt);
+		}
+
+		private static bool CheckIfEliteAlreadyMadeIt(bool eliteMadeIt, string xBin, long eliteXInt, double bestFx)
+		{
+			if (!eliteMadeIt)
 			{
-				int index = Singleton.Random.Next(0, data.Length - 1);
-				data[index].ReplacedByElite = true;
-				data[index].MutatedChromosomeValue = MathHelper.XIntToXBin(eliteXInt);
+				long xInt = MathHelper.XBinToXInt(xBin);
+				if (xInt == eliteXInt)
+				{
+					eliteMadeIt = true;
+					return eliteMadeIt;
+				}
+
+				double xReal = MathHelper.XIntToXReal(xInt);
+				double Fx = MathHelper.Fx(xReal);
+				if (Singleton.TargetFunction == TargetFunction.Max)
+				{
+					if (Fx > bestFx)
+					{
+						eliteMadeIt = true;
+					}
+				}
+				else
+				{
+					if (Fx < bestFx)
+					{
+						eliteMadeIt = true;
+					}
+				}
 			}
+
+			return eliteMadeIt;
+		}
+
+		private static long FindElite(DataRow[] data, long eliteXInt, ref double bestFx)
+		{
+			double bestGX = Double.MinValue;
+			foreach (var row in data)
+			{
+				if (row.GxValue > bestGX)
+				{
+					eliteXInt = row.OriginalSpecimen.XInt;
+					bestGX = row.GxValue;
+					bestFx = row.OriginalSpecimen.Fx;
+				}
+			}
+
+			return eliteXInt;
+		}
+
+		private static void ReplaceWithEliteIfNecessary(DataRow[] data, bool elite, bool eliteMadeIt, long eliteXInt)
+		{
+			if (!elite || eliteMadeIt) return;
+			int index = Singleton.Random.Next(0, data.Length - 1);
+			data[index].ReplacedByElite = true;
+			data[index].MutatedChromosomeValue = MathHelper.XIntToXBin(eliteXInt);
 		}
 
 		[SuppressMessage("ReSharper.DPA", "DPA0001: Memory allocation issues")]

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using System.Linq;
 using Eto.Forms;
 
 namespace INA_Generations
@@ -32,6 +33,46 @@ namespace INA_Generations
 			}
 			output = Double.NaN;
 			return false;
+		}
+
+		public static bool ParseLongArray(string text, string fieldName, string errorMessage, out long[] longArray)
+		{
+			longArray = Array.Empty<long>();
+			try
+			{
+				longArray = text.Split(';').Where(x => x.Trim().Length > 0).Select(x =>
+				{
+					ParseHelper.ParseLong(x, fieldName, out long n);
+					return n;
+				}).ToArray();
+
+				return true;
+			}
+			catch (Exception e)
+			{
+				MessageBox.Show(errorMessage);
+				return false;
+			}
+		}
+
+		public static bool ParseDoubleArray(string text, string fieldName, string errorMessage, out double[] doubleArray)
+		{
+			doubleArray = Array.Empty<double>();
+			try
+			{
+				doubleArray = text.Split(';').Where(x => x.Trim().Length > 0).Select(x =>
+				{
+					ParseHelper.ParseDouble(x, fieldName, out double n);
+					return n;
+				}).ToArray();
+
+				return true;
+			}
+			catch (Exception e)
+			{
+				MessageBox.Show(errorMessage);
+				return false;
+			}
 		}
 		
 		public static bool ParseLong(string text, string textName, out long output, string culture = "")

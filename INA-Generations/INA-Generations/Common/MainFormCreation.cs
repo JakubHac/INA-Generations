@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.Reflection;
 using Eto.Drawing;
 using Eto.Forms;
@@ -11,62 +10,9 @@ namespace INA_Generations
 {
     public partial class MainForm : Form
     {
-        private TextBox AInput;
-        private TextBox Analysis_AInput;
-        private TextBox Climbers_AInput;
-        private TextBox BInput;
-        private TextBox Analysis_BInput;
-        private TextBox Climbers_BInput;
-        private DropDown DInput;
-        private DropDown Analysis_DInput;
-        private DropDown Climbers_DInput;
-        private TextBox NInput;
-        private TextBox Analysis_NInput;
-        private Button StartButton;
-        private Button Analysis_StartButton;
-        private Button Climbers_StartButton;
-        private StackLayout ClimbersOutputColumns;
-        private GridView OutputTable;
-        private GridView GroupedOutputTable;
-        private GridView AnalysisOutputTable;
-        private GridView ClimbersOutputTable;
-        private GridView ClimbersMultiOutputTable;
-        private bool ClimbersShowMultiOutputTable = false;
-        private Label LOutput;
-        private Slider PKSlider;
-        private TextBox PKValue;
-        private TextBox Analysis_PKValue;
-        private Slider PMSlider;
-        private TextBox PMValue;
-        private TextBox Analysis_PMValue;
-        private CheckBox EliteCheckbox;
-        private CheckBox Analysis_EliteCheckbox;
-        private CheckBox BenchmarkCheckbox;
-        private TextBox TInput;
-        private TextBox Analysis_IterInput;
-        private TextBox Analysis_TInput;
-        private TextBox Climbers_TInput;
-        private TabControl TabsControl;
-        private TabPage RawDataPage;
-        private TabPage PlotPage;
-        private TabPage GroupedResultsPage;
-        private TabPage AnalysisResultsPage;
-        private TabPage ClimbersRawDataPage;
-        private TabPage ClimbersPlotPage;
-        private PlotView ClimbersPlot;
-        private PlotView Plot;
-        private StackLayout Inputs;
-        private StackLayout SecondaryInputs;
-        private StackLayout Analysis_Inputs;
-        private StackLayout Climbers_Inputs;
         
-        private DropDown RouletteTypeDropdown;
-        private DropDown TargetFunctionDropdown;
-        private DropDown Climbers_TargetFunctionDropdown;
-        private DropDown Analysis_TargetFunctionDropdown;
-
+        private TabControl TabsControl;
         const int inputsSeparation = 30;
-
         private const string sliderPrecision = "0.00000000";
 
         public MainForm()
@@ -771,13 +717,6 @@ namespace INA_Generations
                 DataStore = new AnalysisDataRow[0],
                 Width = Width - 42
             };
-
-            // AnalysisOutputTableScrollable = new Scrollable()
-            // {
-            // 	Content = AnalysisOutputTable,
-            // 	Width = Width - 40,
-            // 	Height = Height - 180
-            // };
 
             foreach (PropertyInfo property in typeof(AnalysisDataRow).GetProperties())
             {

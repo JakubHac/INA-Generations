@@ -16,12 +16,5 @@
 			HitPercent = hitPercent;
 			AggregateHitPercent = aggregateHitPercent;
 		}
-
-		// public string DisplayNumberOfSteps => "";//NumberOfSteps.ToString();
-		// public string DisplayNumberOfSolutions => "";//NumberOfSolutions.ToString();
-		// public string DisplayHitPercent => "";//HitPercent.ToString("P");
-		// public string DisplayAggregateNumberOfSolutions => "";//AggregateNumberOfSolutions.ToString();
-		// public string DisplayAggregateHitPercent => "";//AggregateHitPercent.ToString("P");
-
 	}
 }
