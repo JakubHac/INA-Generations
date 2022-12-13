@@ -128,13 +128,7 @@ namespace INA_Generations
                     break;
             }
         }
-
         
-
-        
-
-       
-
         Label Label(string text, string tooltip = null)
         {
             if (tooltip == null)
@@ -159,7 +153,6 @@ namespace INA_Generations
                 Width = inputsSeparation
             };
         }
-
         
     }
 }

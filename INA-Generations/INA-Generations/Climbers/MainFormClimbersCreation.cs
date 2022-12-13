@@ -9,15 +9,16 @@ namespace INA_Generations
 	{
 		private TextBox Climbers_AInput;
 		private TextBox Climbers_BInput;
+		private TextBox Climbers_IInput;
 		private DropDown Climbers_DInput;
 		private Button Climbers_StartButton;
 		private StackLayout ClimbersOutputColumns;
-
 		private GridView ClimbersOutputTable;
 		private GridView ClimbersMultiOutputTable;
 		private bool ClimbersShowMultiOutputTable = false;
 
 		private TextBox Climbers_TInput;
+		private CheckBox Climbers_Analysis;
 
 		private TabPage ClimbersRawDataPage;
 		private TabPage ClimbersPlotPage;
@@ -151,12 +152,12 @@ namespace INA_Generations
             Climbers_AInput = new TextBox()
             {
                 Text = "-4",
-                Width = 40
+                Width = 50
             };
             Climbers_BInput = new TextBox()
             {
                 Text = "12",
-                Width = 40
+                Width = 50
             };
             Climbers_DInput = new DropDown()
             {
@@ -166,7 +167,19 @@ namespace INA_Generations
             Climbers_TInput = new TextBox()
             {
                 Text = "100",
-                Width = 150
+                Width = 50
+            };
+            Climbers_IInput = new TextBox()
+            {
+	            Text = "100",
+	            Width = 50,
+	            ToolTip = "Iteracje analizy dla każdego T"
+            };
+            Climbers_Analysis = new CheckBox()
+            {
+	            ThreeState = false,
+	            Checked = true,
+	            ToolTip = "Analiza od 1 do T, ma sens tylko dla T > 1"
             };
             Climbers_StartButton = new Button()
             {
@@ -203,12 +216,16 @@ namespace INA_Generations
                             Climbers_TInput,
                             Label("Cel:"),
                             Climbers_TargetFunctionDropdown,
+                            Label("Analiza:", "Analiza od 1 do T, ma sens tylko dla T > 1"),
+                            Climbers_Analysis,
+                            Label("Iteracje:", "Iteracje analizy dla każdego T"),
+                            Climbers_IInput,
                             SeparationPanel(),
                             Climbers_StartButton
                         }
                     },
                     Label(
-                        "Dla T = 1, przprowadzana jest dokładna znaliza pętli wewnętrznej, dla T > 1 przeprowadzana jest dokładna analiza pętli zewnętrznej")
+                        "Dla T = 1, wykres jest do pętli wewnętrznej, dla T > 1 wykres jest dla pętli zewnętrznej")
                 }
             };
         }
