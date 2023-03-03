@@ -42,9 +42,9 @@ namespace INA_Generations
 			SyncPKValueToSlider();
 			SyncPMValueToSlider();
 
-			GroupingCancellationTokenSource.Cancel();
-			GroupingCancellationTokenSource = new CancellationTokenSource();
-			GroupingCancellationToken = CancellationToken.None;
+			// GroupingCancellationTokenSource.Cancel();
+			// GroupingCancellationTokenSource = new CancellationTokenSource();
+			// GroupingCancellationToken = CancellationToken.None;
 
 			Singleton.PK = PKSlider.Value / (double)PKSlider.MaxValue;
 			Singleton.PM = PMSlider.Value / (double)PMSlider.MaxValue;
@@ -208,8 +208,8 @@ namespace INA_Generations
 			{
 				new GroupDataRow() { xBinValue = "grupowanie odbywa się na osobnym wątku, chwilę trzeba poczekać" }
 			});
-			GroupingCancellationToken = GroupingCancellationTokenSource.Token;
-			Task.Run(() => GroupData(data, GroupingCancellationToken), GroupingCancellationToken);
+			// GroupingCancellationToken = GroupingCancellationTokenSource.Token;
+			// Task.Run(() => GroupData(data, GroupingCancellationToken), GroupingCancellationToken);
 			
 			void InitPlot(DataRow[] data, out List<double> MinFx, out List<double> MaxFx, out List<double> AvgFx, out SignalPlot MinGxPlot,
 				out SignalPlot AvgGxPlot, out SignalPlot MaxGxPlot)

@@ -8,8 +8,8 @@ namespace INA_Generations
 {
 	public partial class MainForm
 	{
-		private CancellationToken GroupingCancellationToken = CancellationToken.None;
-		private CancellationTokenSource GroupingCancellationTokenSource = new CancellationTokenSource();
+		// private CancellationToken GroupingCancellationToken = CancellationToken.None;
+		// private CancellationTokenSource GroupingCancellationTokenSource = new CancellationTokenSource();
 
 		private void StartAnalysis()
 		{

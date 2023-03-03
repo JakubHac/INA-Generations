@@ -108,73 +108,8 @@ namespace INA_Generations
 			{
 				ClimbersExecuteMultiIter(t);
 			}
-
-			// if (t <= 1)
-			// {
-			// ClimbersPlot.Reset();
-			// SignalPlot climbersPlot = new SignalPlot();
-			// climbersPlot.Color = Color.LawnGreen;
-			// climbersPlot.FillBelow(Color.Lime, 1f);
-			// climbersPlot.SampleRate = 1;
-			// climbersPlot.MinRenderIndex = 0;
-			// ClimbersPlot.Plot.Add(climbersPlot);
-			// List<double> PlotData = new List<double>();
-			// ObservableCollection<Specimen>
-			// 	dataStore = (ObservableCollection<Specimen>)ClimbersOutputTable.DataStore;
-			// dataStore.Clear();
-			// 	foreach (var specimen in climbers)
-			// 	{
-			// 		dataStore.Add(specimen);
-			// 		PlotData.Add(specimen.Fx);
-			// 	}
-			//
-			// ClimbersSingleIterPlot.Ys = PlotData.ToArray();
-			// ClimbersSingleIterPlot.MaxRenderIndex = ClimbersSingleIterPlot.PointCount - 1;
-			//
-			// 	ClimbersOutputTable.Visible = true;
-			// 	ClimbersMultiOutputTable.Visible = false;
-			// }
-			// else
-			// {
-			// 	long maxSteps = StepsToSolutionsDict.Max(x => x.Key);
-			// 	long aggregateSum = 0;
-			// 	var Solutions = new List<ClimbersOutput>();
-			//
-			// 	for (long i = 0; i <= maxSteps; i++)
-			// 	{
-			// 		if (StepsToSolutionsDict.ContainsKey(i))
-			// 		{
-			// 			long solutions = StepsToSolutionsDict[i];
-			// 			aggregateSum += solutions;
-			// 			double hitPercent = (double)solutions / (double)t;
-			// 			double aggregateHitPercent = (double)aggregateSum / (double)t;
-			//
-			// 			Solutions.Add(new ClimbersOutput(i, solutions, aggregateSum, hitPercent, aggregateHitPercent));
-			// 		}
-			// 		else
-			// 		{
-			// 			double aggregateHitPercent = (double)aggregateSum / (double)t;
-			// 			Solutions.Add(new ClimbersOutput(i, 0, aggregateSum, 0, aggregateHitPercent));
-			// 		}
-			// 	}
-			//
-			// 	ObservableCollection<ClimbersOutput> dataStore =
-			// 		(ObservableCollection<ClimbersOutput>)ClimbersMultiOutputTable.DataStore;
-			// 	dataStore.Clear();
-			// 	foreach (var climbersOutput in Solutions)
-			// 	{
-			// 		dataStore.Add(climbersOutput);
-			// 	}
-			//
-			// 	ClimbersOutputTable.Visible = false;
-			// 	ClimbersMultiOutputTable.Visible = true;
-			// }
-			//
-			// ClimbersPlot.Plot.AxisAuto(0.05f, 0.1f);
-			// ClimbersPlot.Refresh();
 		}
-
-
+		
 		private void ClimbersExecuteMultiIter(long t)
 		{
 			var bestOfEveryIter = ClimbersOuterLoop(t);
