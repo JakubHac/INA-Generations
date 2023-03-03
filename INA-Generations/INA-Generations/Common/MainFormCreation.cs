@@ -18,7 +18,7 @@ namespace INA_Generations
             Title = "INA Generacje Hac 19755";
             Width = 1260;
             Height = 400;
-            MinimumSize = new Size(1220, 400);
+            MinimumSize = new(1220, 400);
             Resizable = true;
 
             RefreshItemsSize = () =>
@@ -34,7 +34,7 @@ namespace INA_Generations
             CreateGeneticsAnalysis();
             CreateClimbers();
             
-            TabsControl = new TabControl()
+            TabsControl = new()
             {
                 Pages =
                 {
@@ -133,13 +133,13 @@ namespace INA_Generations
         {
             if (tooltip == null)
             {
-                return new Label()
+                return new()
                 {
                     Text = text
                 };
             }
 
-            return new Label()
+            return new()
             {
                 Text = text,
                 ToolTip = tooltip
@@ -148,7 +148,7 @@ namespace INA_Generations
 
         Panel SeparationPanel()
         {
-            return new Panel()
+            return new()
             {
                 Width = inputsSeparation
             };

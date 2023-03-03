@@ -9,8 +9,7 @@ namespace INA_Generations
 {
 	public class RouletteDialog : Dialog
 	{
-		private List<(object obj, string displayName, Color color, double chance)> Chances =
-			new List<(object obj, string displayName, Color color, double chance)>();
+		private List<(object obj, string displayName, Color color, double chance)> Chances = new();
 		public double Value;
 		public object Result;
 		private Bitmap Bitmap;
@@ -20,8 +19,8 @@ namespace INA_Generations
 		public RouletteDialog()
 		{
 			Title = "Koło Fortuny Jakuba Hac. Wszelkie prawa zastrzeżone";
-			Bitmap = new Bitmap(imageSize, imageSize, PixelFormat.Format32bppRgb);
-			Graphics = new Graphics(Bitmap);
+			Bitmap = new(imageSize, imageSize, PixelFormat.Format32bppRgb);
+			Graphics = new(Bitmap);
 			DrawWheel();
 			
 			Application.Instance.InvokeAsync(Animate);
@@ -31,8 +30,8 @@ namespace INA_Generations
 		{
 			Title = "Koło Fortuny Jakuba Hac. Wszelkie prawa zastrzeżone";
 			Chances = chances.Select(x => (x.obj, x.displayName, new ColorHSB((float)Singleton.Random.NextDouble() * 360f, 1f, 1f, 1f).ToColor(), x.chance)).ToList();
-			Bitmap = new Bitmap(imageSize, imageSize, PixelFormat.Format32bppRgb);
-			Graphics = new Graphics(Bitmap);
+			Bitmap = new(imageSize, imageSize, PixelFormat.Format32bppRgb);
+			Graphics = new(Bitmap);
 			DrawWheel();
 			
 			Application.Instance.InvokeAsync(Animate);

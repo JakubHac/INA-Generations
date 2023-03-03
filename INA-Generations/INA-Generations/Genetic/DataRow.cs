@@ -6,13 +6,13 @@ namespace INA_Generations
 {
 	public class DataRow
 	{
-		public static DataRow Empty = new DataRow(null, -1);
+		public static DataRow Empty = new(null, -1);
 
 		public Specimen OriginalSpecimen = null;
 		public double SelectionRandom;
 		public double ParentRandom = Double.PositiveInfinity;
 		public int? PCValue = null;
-		public SortedSet<int> MutatedGenesValue = new SortedSet<int>();
+		public SortedSet<int> MutatedGenesValue = new();
 		public bool ReplacedByElite = false;
 
 		public DataRow(Specimen originalSpecimen, long index)
@@ -44,7 +44,7 @@ namespace INA_Generations
 					else
 					{
 						List<(bool obj, string displayName, double chance)> pieChart =
-							new List<(bool obj, string displayName, double chance)>()
+							new()
 							{
 								(true, "Zostań Rodzicem", Singleton.PK - double.Epsilon),
 								(false, "Nie Bądź Rodzicem", 1f - Singleton.PK)

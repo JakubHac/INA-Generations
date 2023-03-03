@@ -4,7 +4,7 @@
 	{
 		private double BruteForceBestValue()
 		{
-			Specimen tester = new Specimen(0);
+			Specimen tester = new(0);
 			double bestSoFar = Singleton.TargetFunction == TargetFunction.Max ? double.MinValue : double.MaxValue;
 			while (tester.xReal <= Singleton.b)
 			{
@@ -23,7 +23,7 @@
 						}
 						break;
 				}
-				tester = new Specimen(tester.XInt + 1);
+				tester = new(tester.XInt + 1);
 			}
 			return bestSoFar;
 		}

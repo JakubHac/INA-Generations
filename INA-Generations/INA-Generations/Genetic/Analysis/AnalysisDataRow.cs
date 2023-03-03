@@ -2,7 +2,7 @@
 {
 	public class AnalysisDataRow
 	{
-		public static AnalysisDataRow Empty = new AnalysisDataRow();
+		public static AnalysisDataRow Empty = new();
 		
 		public long NValue = 0;
 		public long TValue = 0;

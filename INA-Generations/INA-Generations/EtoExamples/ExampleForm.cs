@@ -8,7 +8,7 @@ namespace INA_Generations
 		public ExampleForm()
 		{
 			Title = "My Eto Form";
-			MinimumSize = new Size(200, 200);
+			MinimumSize = new(200, 200);
 
 			Content = new StackLayout
 			{
@@ -32,7 +32,7 @@ namespace INA_Generations
 			aboutCommand.Executed += (sender, e) => new AboutDialog().ShowDialog(this);
 
 			// create menu
-			Menu = new MenuBar
+			Menu = new()
 			{
 				Items =
 				{
@@ -51,7 +51,7 @@ namespace INA_Generations
 			};
 
 			// create toolbar			
-			ToolBar = new ToolBar { Items = { clickMe } };
+			ToolBar = new() { Items = { clickMe } };
 		}
 	}
 }

@@ -28,7 +28,7 @@ namespace INA_Generations
 			
 			CreateAnalysisOutputTable();
 			
-			AnalysisResultsPage = new TabPage()
+			AnalysisResultsPage = new()
 			{
 				Content = new StackLayout()
 				{
@@ -55,22 +55,22 @@ namespace INA_Generations
 		
 		private StackLayout CreateAnalysisInputs()
         {
-            Analysis_AInput = new TextBox()
+            Analysis_AInput = new()
             {
                 Text = "-4",
                 Width = 40
             };
-            Analysis_BInput = new TextBox()
+            Analysis_BInput = new()
             {
                 Text = "12",
                 Width = 40
             };
-            Analysis_DInput = new DropDown()
+            Analysis_DInput = new()
             {
                 Items = { "1", "0.1", "0.01", "0.001" },
                 SelectedIndex = 3
             };
-            Analysis_PKValue = new TextBox()
+            Analysis_PKValue = new()
             {
                 Text = "",
                 Width = 150
@@ -83,13 +83,13 @@ namespace INA_Generations
 
             Analysis_PKValue.Text = Analysis_PKValue.Text.Substring(1);
 
-            Analysis_PMValue = new TextBox()
+            Analysis_PMValue = new()
             {
                 Text =
                     $"{0.0001.ToString("0.0000")};{0.0005.ToString("0.0000")};{0.001.ToString("0.000")};{0.005.ToString("0.000")};{0.01.ToString("0.00")};{0.05.ToString("0.00")}",
                 Width = 150
             };
-            Analysis_NInput = new TextBox()
+            Analysis_NInput = new()
             {
                 Text = "",
                 Width = 150
@@ -102,7 +102,7 @@ namespace INA_Generations
 
             Analysis_NInput.Text = Analysis_NInput.Text.Substring(1);
 
-            Analysis_TInput = new TextBox()
+            Analysis_TInput = new()
             {
                 Text = "",
                 Width = 150
@@ -114,31 +114,31 @@ namespace INA_Generations
 
             Analysis_TInput.Text = Analysis_TInput.Text.Substring(1);
 
-            Analysis_IterInput = new TextBox()
+            Analysis_IterInput = new()
             {
                 Text = "100",
                 ToolTip =
                     "Ilość iteracji dla każdej permutacji parametrów\nz których wynik jest brany jako wartość średnia\nżeby zredukować wpływ \"szczęścia\" na wynik",
                 Width = 40
             };
-            Analysis_StartButton = new Button()
+            Analysis_StartButton = new()
             {
                 Text = "Start",
                 ToolTip = "Może potrwać bardzo długo!",
                 Command = new Command((object sender, EventArgs e) => StartAnalysis())
             };
-            Analysis_TargetFunctionDropdown = new DropDown()
+            Analysis_TargetFunctionDropdown = new()
             {
                 Items = { "Maksimum", "Minimum" },
                 SelectedIndex = 0
             };
-            Analysis_EliteCheckbox = new CheckBox()
+            Analysis_EliteCheckbox = new()
             {
                 Checked = true,
                 ThreeState = false
             };
 
-            return new StackLayout()
+            return new()
             {
                 Orientation = Orientation.Horizontal,
                 AlignLabels = true,
@@ -185,7 +185,7 @@ namespace INA_Generations
 		
 		private void CreateAnalysisOutputTable()
 		{
-			AnalysisOutputTable = new GridView()
+			AnalysisOutputTable = new()
 			{
 				DataStore = new AnalysisDataRow[0],
 				Width = Width - 42
@@ -195,7 +195,7 @@ namespace INA_Generations
 			{
 				if (property.PropertyType != typeof((string, string))) continue;
 
-				AnalysisOutputTable.Columns.Add(new GridColumn()
+				AnalysisOutputTable.Columns.Add(new()
 				{
 					HeaderText = (((string title, string))property.GetValue(AnalysisDataRow.Empty)).title,
 					DataCell = new TextBoxCell()

@@ -36,13 +36,13 @@ namespace INA_Generations
 			CreateClimbersOutputTable();
 			CreateClimbersMultiOutputTable();
 
-			ClimbersPlot = new PlotView();
+			ClimbersPlot = new();
 			ClimbersPlot.Width = 600;
 			ClimbersPlot.Height = 400;
 
 			ClimbersMultiOutputTable.Visible = false;
 
-			ClimbersRawDataPage = new TabPage()
+			ClimbersRawDataPage = new()
 			{
 				Content = new StackLayout()
 				{
@@ -58,7 +58,7 @@ namespace INA_Generations
 				Text = "Wspinacze"
 			};
 
-			ClimbersPlotPage = new TabPage()
+			ClimbersPlotPage = new()
 			{
 				Content = new StackLayout()
 				{
@@ -96,7 +96,7 @@ namespace INA_Generations
 		
 		private void CreateClimbersMultiOutputTable()
         {
-            ClimbersMultiOutputTable = new GridView()
+            ClimbersMultiOutputTable = new()
             {
                 DataStore = new ObservableCollection<ClimbersOutput>(),
                 Width = Width - 42,
@@ -149,50 +149,50 @@ namespace INA_Generations
 
         private StackLayout CreateClimbersInputs()
         {
-            Climbers_AInput = new TextBox()
+            Climbers_AInput = new()
             {
                 Text = "-4",
                 Width = 50
             };
-            Climbers_BInput = new TextBox()
+            Climbers_BInput = new()
             {
                 Text = "12",
                 Width = 50
             };
-            Climbers_DInput = new DropDown()
+            Climbers_DInput = new()
             {
                 Items = { "1", "0.1", "0.01", "0.001" },
                 SelectedIndex = 3
             };
-            Climbers_TInput = new TextBox()
+            Climbers_TInput = new()
             {
                 Text = "100",
                 Width = 50
             };
-            Climbers_IInput = new TextBox()
+            Climbers_IInput = new()
             {
 	            Text = "100",
 	            Width = 50,
 	            ToolTip = "Iteracje analizy dla każdego T"
             };
-            Climbers_Analysis = new CheckBox()
+            Climbers_Analysis = new()
             {
 	            ThreeState = false,
 	            Checked = true,
 	            ToolTip = "Analiza od 1 do T, ma sens tylko dla T > 1"
             };
-            Climbers_StartButton = new Button()
+            Climbers_StartButton = new()
             {
                 Text = "Start",
                 Command = new Command((object sender, EventArgs e) => ExecuteClimbers())
             };
-            Climbers_TargetFunctionDropdown = new DropDown()
+            Climbers_TargetFunctionDropdown = new()
             {
                 Items = { "Maksimum", "Minimum" },
                 SelectedIndex = 0
             };
 
-            return new StackLayout()
+            return new()
             {
                 Orientation = Orientation.Vertical,
                 Items =
@@ -232,7 +232,7 @@ namespace INA_Generations
 
         public void CreateClimbersOutputTable()
         {
-            ClimbersOutputTable = new GridView()
+            ClimbersOutputTable = new()
             {
                 DataStore = new ObservableCollection<Specimen>(),
                 Width = Width - 42,

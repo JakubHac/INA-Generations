@@ -39,10 +39,10 @@ namespace INA_Generations
 			CreateOutputTable();
 			CreateGroupedOutputTable();
 
-			Plot = new PlotView();
+			Plot = new();
 			Plot.Width = 600;
 			Plot.Height = 400;
-			RawDataPage = new TabPage()
+			RawDataPage = new()
 			{
 				Content = new StackLayout()
 				{
@@ -57,7 +57,7 @@ namespace INA_Generations
 				},
 				Text = "Populacja"
 			};
-			PlotPage = new TabPage()
+			PlotPage = new()
 			{
 				Content = new StackLayout()
 				{
@@ -71,7 +71,7 @@ namespace INA_Generations
 				Text = "Wykres"
 			};
 
-			GroupedResultsPage = new TabPage()
+			GroupedResultsPage = new()
 			{
 				Content = new StackLayout()
 				{
@@ -109,40 +109,40 @@ namespace INA_Generations
 		
 		private StackLayout CreateSecondaryInputs()
         {
-            LOutput = new Label()
+            LOutput = new()
             {
                 Text = "0"
             };
 
-            RouletteTypeDropdown = new DropDown()
+            RouletteTypeDropdown = new()
             {
                 Items = { "Wyłączona", "Zakres (0;1)", "Koło Fortuny" },
                 SelectedIndex = 0
             };
-            TargetFunctionDropdown = new DropDown()
+            TargetFunctionDropdown = new()
             {
                 Items = { "Maksimum", "Minimum" },
                 SelectedIndex = 0
             };
 
-            TInput = new TextBox()
+            TInput = new()
             {
                 Text = "50"
             };
 
-            EliteCheckbox = new CheckBox()
+            EliteCheckbox = new()
             {
                 ThreeState = false,
                 Checked = true
             };
 
-            BenchmarkCheckbox = new CheckBox()
+            BenchmarkCheckbox = new()
             {
                 ThreeState = false,
                 Checked = false
             };
 
-            return new StackLayout()
+            return new()
             {
                 Orientation = Orientation.Horizontal,
                 AlignLabels = true,
@@ -194,7 +194,7 @@ namespace INA_Generations
         
         private void CreateOutputTable()
         {
-	        OutputTable = new GridView()
+	        OutputTable = new()
 	        {
 		        DataStore = new DataRow[0],
 		        Width = Width - 42
@@ -204,7 +204,7 @@ namespace INA_Generations
 	        {
 		        if (property.PropertyType != typeof((string, string))) continue;
 
-		        OutputTable.Columns.Add(new GridColumn()
+		        OutputTable.Columns.Add(new()
 		        {
 			        HeaderText = (((string title, string))property.GetValue(DataRow.Empty)).title,
 			        DataCell = new TextBoxCell()
@@ -218,7 +218,7 @@ namespace INA_Generations
 
         private void CreateGroupedOutputTable()
         {
-	        GroupedOutputTable = new GridView()
+	        GroupedOutputTable = new()
 	        {
 		        DataStore = new GroupDataRow[0],
 		        Width = Width - 42
@@ -228,7 +228,7 @@ namespace INA_Generations
 	        {
 		        if (property.PropertyType != typeof((string, string))) continue;
 
-		        GroupedOutputTable.Columns.Add(new GridColumn()
+		        GroupedOutputTable.Columns.Add(new()
 		        {
 			        HeaderText = (((string title, string))property.GetValue(GroupDataRow.Empty)).title,
 			        DataCell = new TextBoxCell()
@@ -242,24 +242,24 @@ namespace INA_Generations
         
          private StackLayout CreateInputs()
         {
-            AInput = new TextBox()
+            AInput = new()
             {
                 Text = "-4"
             };
-            BInput = new TextBox()
+            BInput = new()
             {
                 Text = "12"
             };
-            DInput = new DropDown()
+            DInput = new()
             {
                 Items = { "1", "0.1", "0.01", "0.001" },
                 SelectedIndex = 3
             };
-            NInput = new TextBox()
+            NInput = new()
             {
                 Text = "60"
             };
-            PKSlider = new Slider()
+            PKSlider = new()
             {
                 MinValue = 0,
                 MaxValue = 1_000_000_000,
@@ -267,7 +267,7 @@ namespace INA_Generations
                 Width = 150,
                 ToolTip = "Prawdopodobieństwo Krzyżowania"
             };
-            PKValue = new TextBox()
+            PKValue = new()
             {
                 Text = 0.8.ToString(sliderPrecision),
                 Width = 80,
@@ -302,7 +302,7 @@ namespace INA_Generations
             };
             PKSlider.ValueChanged += (sender, args) => SyncPKValueToSlider();
 
-            PMSlider = new Slider()
+            PMSlider = new()
             {
                 MinValue = 0,
                 MaxValue = 1_000_000_000,
@@ -310,7 +310,7 @@ namespace INA_Generations
                 Width = 150,
                 ToolTip = "Prawdopodobieństwo Mutacji pojedynczego bitu"
             };
-            PMValue = new TextBox()
+            PMValue = new()
             {
                 Text = 0.005.ToString(sliderPrecision),
                 Width = 80,
@@ -345,7 +345,7 @@ namespace INA_Generations
             };
             PMSlider.ValueChanged += (sender, args) => SyncPMValueToSlider();
 
-            StartButton = new Button()
+            StartButton = new()
             {
                 Text = "START",
                 Command = new Command((sender, args) => ExecuteGeneration())

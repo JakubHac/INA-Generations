@@ -45,7 +45,7 @@ namespace INA_Generations
 			else if (Climbers_Analysis.Checked.Value)
 			{
 				double bestInRange = BruteForceBestValue();
-				List<ClimbersOutput> AnalysisData = new List<ClimbersOutput>();
+				List<ClimbersOutput> AnalysisData = new();
 				long aggregateNumberOfSolutions = 0;
 				for (int i = 1; i < (t + 1); i++)
 				{
@@ -67,7 +67,7 @@ namespace INA_Generations
 					aggregateNumberOfSolutions += solutions;
 					double hitPercent = solutions / (double)iters;
 					double aggregateHitPercent = aggregateNumberOfSolutions / (double)(i * iters);
-					AnalysisData.Add(new ClimbersOutput(i, solutions, aggregateNumberOfSolutions, hitPercent,
+					AnalysisData.Add(new(i, solutions, aggregateNumberOfSolutions, hitPercent,
 						aggregateHitPercent));
 				}
 
@@ -83,7 +83,7 @@ namespace INA_Generations
 				ClimbersMultiOutputTable.Visible = true;
 				
 				
-				SignalPlot hitPercentPlot = new SignalPlot();
+				SignalPlot hitPercentPlot = new();
 				hitPercentPlot.Color = Color.LawnGreen;
 				hitPercentPlot.SampleRate = 1;
 				hitPercentPlot.MinRenderIndex = 0;
@@ -92,7 +92,7 @@ namespace INA_Generations
 				hitPercentPlot.Ys = AnalysisData.Select(x => x.HitPercent).ToArray();
 				hitPercentPlot.MaxRenderIndex = hitPercentPlot.PointCount - 1;
 				
-				SignalPlot aggregateHitPercentPlot = new SignalPlot();
+				SignalPlot aggregateHitPercentPlot = new();
 				aggregateHitPercentPlot.Color = Color.OrangeRed;
 				aggregateHitPercentPlot.SampleRate = 1;
 				aggregateHitPercentPlot.MinRenderIndex = 0;
@@ -113,7 +113,7 @@ namespace INA_Generations
 		private void ClimbersExecuteMultiIter(long t)
 		{
 			var bestOfEveryIter = ClimbersOuterLoop(t);
-			List<double> bestFxSoFar = new List<double>() { bestOfEveryIter[0].Fx };
+			List<double> bestFxSoFar = new() { bestOfEveryIter[0].Fx };
 			for (int i = 1; i < bestOfEveryIter.Count; i++)
 			{
 				double bestOfThisIter = bestOfEveryIter[i].Fx;
@@ -129,7 +129,7 @@ namespace INA_Generations
 				}
 			}
 
-			SignalPlot climbersPlot = new SignalPlot();
+			SignalPlot climbersPlot = new();
 			climbersPlot.Color = Color.LawnGreen;
 			//climbersPlot.FillBelow(Color.Lime, 1f);
 			climbersPlot.SampleRate = 1;
@@ -153,7 +153,7 @@ namespace INA_Generations
 
 		private static List<Specimen> ClimbersOuterLoop(long t)
 		{
-			List<Specimen> BestOfEveryIter = new List<Specimen>();
+			List<Specimen> BestOfEveryIter = new();
 			for (int i = 0; i < t; i++)
 			{
 				var progress = ClimbersInnerLoop();
@@ -189,7 +189,7 @@ namespace INA_Generations
 		{
 			var progressHistory = ClimbersInnerLoop();
 
-			SignalPlot climbersPlot = new SignalPlot();
+			SignalPlot climbersPlot = new();
 			climbersPlot.Color = Color.LawnGreen;
 			//climbersPlot.FillBelow(Color.Lime, 1f);
 			climbersPlot.SampleRate = 1;
@@ -213,8 +213,8 @@ namespace INA_Generations
 
 		private static List<Specimen> ClimbersInnerLoop()
 		{
-			Specimen Vc = new Specimen();
-			List<Specimen> progressHistory = new List<Specimen>() { Vc };
+			Specimen Vc = new();
+			List<Specimen> progressHistory = new() { Vc };
 			bool local = false;
 			do
 			{
@@ -222,7 +222,7 @@ namespace INA_Generations
 				bool neighborIsBetter = IsNeighborBetter(bestFx, Vc);
 				if (neighborIsBetter)
 				{
-					Vc = new Specimen(bestNeighbor);
+					Vc = new(bestNeighbor);
 					progressHistory.Add(Vc);
 				}
 				else
@@ -298,7 +298,7 @@ namespace INA_Generations
 			for (int j = 0; j < neighbors.Length; j++)
 			{
 				neighbors[j] =
-					new string(Vc.XBin.Select((x, index) => index == j ? x == '0' ? '1' : '0' : x).ToArray());
+					new(Vc.XBin.Select((x, index) => index == j ? x == '0' ? '1' : '0' : x).ToArray());
 			}
 
 			return neighbors;

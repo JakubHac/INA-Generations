@@ -2,7 +2,7 @@
 {
 	public class GroupDataRow
 	{
-		public static GroupDataRow Empty = new GroupDataRow();
+		public static GroupDataRow Empty = new();
 
 		public GroupDataRow()
 		{

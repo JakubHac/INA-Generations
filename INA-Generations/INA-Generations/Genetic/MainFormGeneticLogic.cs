@@ -206,7 +206,7 @@ namespace INA_Generations
 
 			AddGroupDataToTable(new GroupDataRow[]
 			{
-				new GroupDataRow() { xBinValue = "grupowanie odbywa się na osobnym wątku, chwilę trzeba poczekać" }
+				new() { xBinValue = "grupowanie odbywa się na osobnym wątku, chwilę trzeba poczekać" }
 			});
 			// GroupingCancellationToken = GroupingCancellationTokenSource.Token;
 			// Task.Run(() => GroupData(data, GroupingCancellationToken), GroupingCancellationToken);
@@ -214,24 +214,24 @@ namespace INA_Generations
 			void InitPlot(DataRow[] data, out List<double> MinFx, out List<double> MaxFx, out List<double> AvgFx, out SignalPlot MinGxPlot,
 				out SignalPlot AvgGxPlot, out SignalPlot MaxGxPlot)
 			{
-				MinFx = new List<double>();
-				MaxFx = new List<double>();
-				AvgFx = new List<double>();
+				MinFx = new();
+				MaxFx = new();
+				AvgFx = new();
 				MinFx.Add(data.Min(x => x.OriginalSpecimen.Fx));
 				MaxFx.Add(data.Max(x => x.OriginalSpecimen.Fx));
 				AvgFx.Add(data.Average(x => x.OriginalSpecimen.Fx));
 				Plot.Reset();
-				MinGxPlot = new SignalPlot();
+				MinGxPlot = new();
 				MinGxPlot.Color = Color.Red;
 				MinGxPlot.FillBelow(Color.Crimson, 1f);
 				MinGxPlot.SampleRate = 1;
 				MinGxPlot.MinRenderIndex = 0;
-				AvgGxPlot = new SignalPlot();
+				AvgGxPlot = new();
 				AvgGxPlot.Color = Color.DodgerBlue;
 				AvgGxPlot.FillBelow(Color.Turquoise, 1f);
 				AvgGxPlot.SampleRate = 1;
 				AvgGxPlot.MinRenderIndex = 0;
-				MaxGxPlot = new SignalPlot();
+				MaxGxPlot = new();
 				MaxGxPlot.Color = Color.LawnGreen;
 				MaxGxPlot.FillBelow(Color.Lime, 1f);
 				MaxGxPlot.SampleRate = 1;
@@ -276,7 +276,7 @@ namespace INA_Generations
 		{
 			try
 			{
-				Dictionary<double, long> XRealCounts = new Dictionary<double, long>();
+				Dictionary<double, long> XRealCounts = new();
 				foreach (var dataRow in data)
 				{
 					if (token.IsCancellationRequested)
@@ -296,7 +296,7 @@ namespace INA_Generations
 
 				double dataCountAsDouble = data.Length * 0.01;
 
-				SortedSet<DataGroup> sortedGroups = new SortedSet<DataGroup>();
+				SortedSet<DataGroup> sortedGroups = new();
 
 				foreach (var xRealCount in XRealCounts)
 				{
@@ -305,7 +305,7 @@ namespace INA_Generations
 						return;
 					}
 
-					sortedGroups.Add(new DataGroup(xRealCount.Key, xRealCount.Value / dataCountAsDouble,
+					sortedGroups.Add(new(xRealCount.Key, xRealCount.Value / dataCountAsDouble,
 						MathHelper.Fx(xRealCount.Key)));
 				}
 
@@ -323,7 +323,7 @@ namespace INA_Generations
 						return;
 					}
 
-					Groups[i] = new GroupDataRow(i + 1, group.XReal, group.Percent);
+					Groups[i] = new(i + 1, group.XReal, group.Percent);
 					i++;
 				}
 
@@ -339,8 +339,8 @@ namespace INA_Generations
 		{
 			Parallel.For(0, n, i =>
 			{
-				Specimen specimen = new Specimen();
-				data[i] = new DataRow(specimen, i + 1);
+				Specimen specimen = new();
+				data[i] = new(specimen, i + 1);
 			});
 		}
 
@@ -348,7 +348,7 @@ namespace INA_Generations
 		{
 			for (int i = 0; i < data.Length; i++)
 			{
-				data[i] = new DataRow(new Specimen(data[i].FinalXRealValue), data[i].Index);
+				data[i] = new(new(data[i].FinalXRealValue), data[i].Index);
 			}
 		}
 		
@@ -374,7 +374,7 @@ namespace INA_Generations
 
 			Parallel.ForEach(data, dataRow =>
 			{
-				dataRow.MutatedGenesValue = new SortedSet<int>();
+				dataRow.MutatedGenesValue = new();
 				char[] chromosome = dataRow.AfterChild.Item2.ToCharArray();
 				for (int j = 0; j < Singleton.l; j++)
 				{
@@ -385,7 +385,7 @@ namespace INA_Generations
 					}
 				}
 
-				string xBin = new string(chromosome);
+				string xBin = new(chromosome);
 				dataRow.MutatedChromosomeValue = xBin;
 				eliteMadeIt = CheckIfEliteAlreadyMadeIt(eliteMadeIt, xBin, eliteXInt, bestFx);
 			});
@@ -476,8 +476,7 @@ namespace INA_Generations
 						dataRow.ParentsWith.PCValue = pc;
 						break;
 					case RouletteType.PieChart:
-						List<(int obj, string displayName, double chance)> possiblePC =
-							new List<(int obj, string displayName, double chance)>();
+						List<(int obj, string displayName, double chance)> possiblePC = new();
 						for (int j = 1; j < Singleton.l; j++)
 						{
 							possiblePC.Add((

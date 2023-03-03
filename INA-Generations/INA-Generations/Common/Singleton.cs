@@ -7,7 +7,7 @@ namespace INA_Generations
 	public static class Singleton
 	{
 		[ThreadStatic] private static Random localRandom;
-		public static Random Random => localRandom ??= new Random();
+		public static Random Random => localRandom ??= new();
 		public static RouletteType RandomRoulette = RouletteType.Disabled;
 		public static string Platform;
 		public static TargetFunction TargetFunction = TargetFunction.Max;

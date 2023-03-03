@@ -1,15 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
-using Eto.Forms;
 
 namespace INA_Generations
 {
 	public partial class MainForm
 	{
-		// private CancellationToken GroupingCancellationToken = CancellationToken.None;
-		// private CancellationTokenSource GroupingCancellationTokenSource = new CancellationTokenSource();
 
 		private void StartAnalysis()
 		{
@@ -38,7 +34,7 @@ namespace INA_Generations
 				"Minimum" => TargetFunction.Min
 			};
 
-			List<AnalysisDataRow> analysisDataRows = new List<AnalysisDataRow>();
+			List<AnalysisDataRow> analysisDataRows = new();
 
 			bool elite = Analysis_EliteCheckbox.Checked.Value;
 			Singleton.d = d;
@@ -67,7 +63,7 @@ namespace INA_Generations
 
 			void ExecutePermutation(long l1, long l2, long pk1, long pm1)
 			{
-				List<double> FXs = new List<double>();
+				List<double> FXs = new();
 				for (long i = 0; i < iters; i++)
 				{
 					DataRow[] data = new DataRow[Ns[l1]];
@@ -81,7 +77,7 @@ namespace INA_Generations
 					FXs.Add(data.Average(x => x.FinalFxRealValue));
 				}
 
-				analysisDataRows.Add(new AnalysisDataRow(Ns[l1], Ts[l2], PKs[pk1], PMs[pm1], FXs.Average()));
+				analysisDataRows.Add(new(Ns[l1], Ts[l2], PKs[pk1], PMs[pm1], FXs.Average()));
 			}
 
 			if (Singleton.TargetFunction == TargetFunction.Max)
