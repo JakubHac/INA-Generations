@@ -2,8 +2,6 @@
 {
 	public class GroupDataRow
 	{
-		public static GroupDataRow Empty = new();
-
 		public GroupDataRow()
 		{
 		}
@@ -11,23 +9,28 @@
 		public GroupDataRow(long index, double xRealValue, double percentValue)
 		{
 			Index = index;
-			this.xRealValue = xRealValue;
-			this.xBinValue = MathHelper.XIntToXBin(MathHelper.XRealToXInt(xRealValue));
-			this.FxValue = MathHelper.Fx(xRealValue);
+			XRealValue = xRealValue;
+			XBinValue = MathHelper.XIntToXBin(MathHelper.XRealToXInt(xRealValue));
+			FxValue = MathHelper.Fx(xRealValue);
 			PercentValue = percentValue;
 		}
 
 
-		public long Index = 0;
-		public double xRealValue = 0;
-		public string xBinValue = "";
-		public double FxValue = 0;
-		public double PercentValue = 0;
+		private long Index;
+		private double XRealValue;
+		public string XBinValue = "";
+		private double FxValue;
+		private double PercentValue;
 		
-		public (string, string) N => ("N", Index.ToString());
-		public (string, string) xReal => ("xReal", xRealValue.ToString());
-		public (string, string) xBin => ("xBin", xBinValue);
-		public (string, string) Fx => ("F(x)", FxValue.ToString());
-		public (string, string) Percent => ("%", PercentValue.ToString());
+		[DisplayInGridView("N")]
+		public string N => Index.ToString();
+		[DisplayInGridView("xReal")]
+		public string XReal => XRealValue.ToString();
+		[DisplayInGridView("xBin")]
+		public string XBin => XBinValue;
+		[DisplayInGridView("F(x)")]
+		public string Fx => FxValue.ToString();
+		[DisplayInGridView("%")]
+		public string Percent => PercentValue.ToString();
 	}
 }

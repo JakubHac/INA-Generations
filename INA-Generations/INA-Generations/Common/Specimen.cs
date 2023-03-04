@@ -2,22 +2,26 @@
 {
 	public class Specimen
 	{
-		public double xReal;
+		
+		[DisplayInGridView("xReal")]
+		public double XReal;
 		public long XInt;
+		[DisplayInGridView("xBin")]
 		public string XBin;
+		[DisplayInGridView("F(x)")]
 		public double Fx;
 
 		public Specimen()
 		{
-			xReal = Singleton.RandomXReal();
-			XInt = MathHelper.XRealToXInt(xReal);
+			XReal = Singleton.RandomXReal();
+			XInt = MathHelper.XRealToXInt(XReal);
 			XBin = MathHelper.XIntToXBin(XInt);
-			Fx = MathHelper.Fx(xReal);
+			Fx = MathHelper.Fx(XReal);
 		}
 		
 		public Specimen(double xReal)
 		{
-			this.xReal = xReal;
+			XReal = xReal;
 			XInt = MathHelper.XRealToXInt(xReal);
 			XBin = MathHelper.XIntToXBin(XInt);
 			Fx = MathHelper.Fx(xReal);
@@ -27,16 +31,16 @@
 		{
 			XInt = xInt;
 			XBin = MathHelper.XIntToXBin(XInt);
-			xReal = MathHelper.XIntToXReal(xInt);
-			Fx = MathHelper.Fx(xReal);
+			XReal = MathHelper.XIntToXReal(xInt);
+			Fx = MathHelper.Fx(XReal);
 		}
 		
 		public Specimen(string xBin)
 		{
 			XBin = xBin;
 			XInt = MathHelper.XBinToXInt(XBin);
-			xReal = MathHelper.XIntToXReal(XInt);
-			Fx = MathHelper.Fx(xReal);
+			XReal = MathHelper.XIntToXReal(XInt);
+			Fx = MathHelper.Fx(XReal);
 		}
 	}
 }

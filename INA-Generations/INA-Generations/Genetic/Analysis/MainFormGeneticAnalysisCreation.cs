@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Reflection;
 using Eto.Forms;
 
 namespace INA_Generations
@@ -187,24 +186,10 @@ namespace INA_Generations
 		{
 			AnalysisOutputTable = new()
 			{
-				DataStore = new AnalysisDataRow[0],
 				Width = Width - 42
 			};
-
-			foreach (PropertyInfo property in typeof(AnalysisDataRow).GetProperties())
-			{
-				if (property.PropertyType != typeof((string, string))) continue;
-
-				AnalysisOutputTable.Columns.Add(new()
-				{
-					HeaderText = (((string title, string))property.GetValue(AnalysisDataRow.Empty)).title,
-					DataCell = new TextBoxCell()
-					{
-						Binding = Binding.Property<AnalysisDataRow, string>(x =>
-							(((string, string value))property.GetValue(x)).value)
-					}
-				});
-			}
+			
+			AnalysisOutputTable.AddColumns<AnalysisDataRow>();
 		}
 	}
 }

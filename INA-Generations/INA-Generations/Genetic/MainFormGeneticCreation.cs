@@ -1,5 +1,6 @@
 ﻿using System;
-using System.Reflection;
+using System.Collections.ObjectModel;
+using System.Linq;
 using Eto.Forms;
 using ScottPlot.Eto;
 
@@ -44,7 +45,7 @@ namespace INA_Generations
 			Plot.Height = 400;
 			RawDataPage = new()
 			{
-				Content = new StackLayout()
+				Content = new StackLayout
 				{
 					Orientation = Orientation.Vertical,
 					Padding = 10,
@@ -59,7 +60,7 @@ namespace INA_Generations
 			};
 			PlotPage = new()
 			{
-				Content = new StackLayout()
+				Content = new StackLayout
 				{
 					Orientation = Orientation.Vertical,
 					Padding = 10,
@@ -73,7 +74,7 @@ namespace INA_Generations
 
 			GroupedResultsPage = new()
 			{
-				Content = new StackLayout()
+				Content = new StackLayout
 				{
 					Orientation = Orientation.Vertical,
 					Padding = 10,
@@ -98,7 +99,7 @@ namespace INA_Generations
 					GroupedOutputTable.Width = Width - 40 - 30;
 					GroupedOutputTable.Height = Height - 180 - 20;
 				}
-				
+
 				if (Plot != null)
 				{
 					Plot.Width = Width - 40 - 30 - 30;
@@ -106,298 +107,301 @@ namespace INA_Generations
 				}
 			};
 		}
-		
+
 		private StackLayout CreateSecondaryInputs()
-        {
-            LOutput = new()
-            {
-                Text = "0"
-            };
+		{
+			LOutput = new()
+			{
+				Text = "0"
+			};
 
-            RouletteTypeDropdown = new()
-            {
-                Items = { "Wyłączona", "Zakres (0;1)", "Koło Fortuny" },
-                SelectedIndex = 0
-            };
-            TargetFunctionDropdown = new()
-            {
-                Items = { "Maksimum", "Minimum" },
-                SelectedIndex = 0
-            };
+			RouletteTypeDropdown = new()
+			{
+				Items = { "Wyłączona", "Zakres (0;1)", "Koło Fortuny" },
+				SelectedIndex = 0
+			};
+			TargetFunctionDropdown = new()
+			{
+				Items = { "Maksimum", "Minimum" },
+				SelectedIndex = 0
+			};
 
-            TInput = new()
-            {
-                Text = "50"
-            };
+			TInput = new()
+			{
+				Text = "50"
+			};
 
-            EliteCheckbox = new()
-            {
-                ThreeState = false,
-                Checked = true
-            };
+			EliteCheckbox = new()
+			{
+				ThreeState = false,
+				Checked = true
+			};
 
-            BenchmarkCheckbox = new()
-            {
-                ThreeState = false,
-                Checked = false
-            };
+			BenchmarkCheckbox = new()
+			{
+				ThreeState = false,
+				Checked = false
+			};
 
-            return new()
-            {
-                Orientation = Orientation.Horizontal,
-                AlignLabels = true,
-                VerticalContentAlignment = VerticalAlignment.Center,
-                HorizontalContentAlignment = HorizontalAlignment.Center,
-                Padding = 10,
-                Items =
-                {
-                    Label("L:"),
-                    LOutput,
-                    SeparationPanel(),
-                    Label("Ruletka:"),
-                    RouletteTypeDropdown,
-                    SeparationPanel(),
-                    Label("Funkcja Celu:"),
-                    TargetFunctionDropdown,
-                    SeparationPanel(),
-                    Label("T:"),
-                    TInput,
-                    SeparationPanel(),
-                    Label("Elita:"),
-                    EliteCheckbox,
-                    SeparationPanel(),
-                    Label("Benchmark:"),
-                    BenchmarkCheckbox
-                }
-            };
-        }
+			return new()
+			{
+				Orientation = Orientation.Horizontal,
+				AlignLabels = true,
+				VerticalContentAlignment = VerticalAlignment.Center,
+				HorizontalContentAlignment = HorizontalAlignment.Center,
+				Padding = 10,
+				Items =
+				{
+					Label("L:"),
+					LOutput,
+					SeparationPanel(),
+					Label("Ruletka:"),
+					RouletteTypeDropdown,
+					SeparationPanel(),
+					Label("Funkcja Celu:"),
+					TargetFunctionDropdown,
+					SeparationPanel(),
+					Label("T:"),
+					TInput,
+					SeparationPanel(),
+					Label("Elita:"),
+					EliteCheckbox,
+					SeparationPanel(),
+					Label("Benchmark:"),
+					BenchmarkCheckbox
+				}
+			};
+		}
 
-        private void ClearOutputTable()
-        {
-            OutputTable.DataStore = Array.Empty<DataRow>();
-        }
+		// private void ClearOutputTable()
+		// {
+		// 	OutputTable.DataStore = Array.Empty<DataRow>();
+		// }
 
-        private void ClearGroupOutputTable()
-        {
-            GroupedOutputTable.DataStore = Array.Empty<GroupDataRow>();
-        }
-        
-        private void AddDataToTable(DataRow[] data)
-        {
-	        OutputTable.DataStore = data;
-        }
+		// private void ClearGroupOutputTable()
+		// {
+		// 	GroupedOutputTable.DataStore = Array.Empty<GroupDataRow>();
+		// }
 
-        private void AddGroupDataToTable(GroupDataRow[] dataGroups)
-        {
-	        GroupedOutputTable.DataStore = dataGroups;
-        }
-        
-        private void CreateOutputTable()
-        {
-	        OutputTable = new()
-	        {
-		        DataStore = new DataRow[0],
-		        Width = Width - 42
-	        };
+		// private void AddDataToTable(DataRow[] data)
+		// {
+		// 	OutputTable.DataStore = data;
+		// }
 
-	        foreach (PropertyInfo property in typeof(DataRow).GetProperties())
-	        {
-		        if (property.PropertyType != typeof((string, string))) continue;
+		// private void AddGroupDataToTable(GroupDataRow[] dataGroups)
+		// {
+		// 	GroupedOutputTable.DataStore = dataGroups;
+		// }
 
-		        OutputTable.Columns.Add(new()
-		        {
-			        HeaderText = (((string title, string))property.GetValue(DataRow.Empty)).title,
-			        DataCell = new TextBoxCell()
-			        {
-				        Binding = Binding.Property<DataRow, string>(x =>
-					        (((string, string value))property.GetValue(x)).value)
-			        }
-		        });
-	        }
-        }
+		private void CreateOutputTable()
+		{
+			OutputTable = new()
+			{
+				//DataStore = new DataRow[0],
+				Width = Width - 42
+			};
+			OutputTable.AddColumns<DataRow>();
 
-        private void CreateGroupedOutputTable()
-        {
-	        GroupedOutputTable = new()
-	        {
-		        DataStore = new GroupDataRow[0],
-		        Width = Width - 42
-	        };
+			// foreach (PropertyInfo property in typeof(DataRow).GetProperties())
+			// {
+			// 	if (property.PropertyType != typeof((string, string))) continue;
+			//
+			// 	OutputTable.Columns.Add(new()
+			// 	{
+			// 		HeaderText = property.Name,
+			// 		DataCell = new TextBoxCell()
+			// 		{
+			// 			Binding = Binding.Property<DataRow, string>(x =>
+			// 				(((string, string value))property.GetValue(x)).value)
+			// 		}
+			// 	});
+			// }
+		}
 
-	        foreach (PropertyInfo property in typeof(GroupDataRow).GetProperties())
-	        {
-		        if (property.PropertyType != typeof((string, string))) continue;
+		private void CreateGroupedOutputTable()
+		{
+			GroupedOutputTable = new()
+			{
+				//DataStore = new GroupDataRow[0],
+				Width = Width - 42
+			};
+			
+			GroupedOutputTable.AddColumns<GroupDataRow>();
 
-		        GroupedOutputTable.Columns.Add(new()
-		        {
-			        HeaderText = (((string title, string))property.GetValue(GroupDataRow.Empty)).title,
-			        DataCell = new TextBoxCell()
-			        {
-				        Binding = Binding.Property<GroupDataRow, string>(x =>
-					        (((string, string value))property.GetValue(x)).value)
-			        }
-		        });
-	        }
-        }
-        
-         private StackLayout CreateInputs()
-        {
-            AInput = new()
-            {
-                Text = "-4"
-            };
-            BInput = new()
-            {
-                Text = "12"
-            };
-            DInput = new()
-            {
-                Items = { "1", "0.1", "0.01", "0.001" },
-                SelectedIndex = 3
-            };
-            NInput = new()
-            {
-                Text = "60"
-            };
-            PKSlider = new()
-            {
-                MinValue = 0,
-                MaxValue = 1_000_000_000,
-                Value = (int)(1_000_000_000.0 * 0.8),
-                Width = 150,
-                ToolTip = "Prawdopodobieństwo Krzyżowania"
-            };
-            PKValue = new()
-            {
-                Text = 0.8.ToString(sliderPrecision),
-                Width = 80,
-                ToolTip = "Prawdopodobieństwo Krzyżowania"
-            };
+			// foreach (PropertyInfo property in typeof(GroupDataRow).GetProperties())
+			// {
+			// 	if (property.PropertyType != typeof((string, string))) continue;
+			// 	
+			// 	GroupedOutputTable.Columns.Add(new()
+			// 	{
+			// 		HeaderText = property.Name,
+			// 		DataCell = new TextBoxCell()
+			// 		{
+			// 			Binding = Binding.Property<GroupDataRow, string>(x =>
+			// 				(((string, string value))property.GetValue(x)).value)
+			// 		}
+			// 	});
+			// }
+		}
 
-            PKValue.KeyDown += (sender, args) =>
-            {
-                if (args.Key == Keys.Enter)
-                {
-                    try
-                    {
-                        double val = double.Parse(PKValue.Text);
-                        if (val > 1.0)
-                        {
-                            PKValue.Text = 1.0.ToString(sliderPrecision);
-                            val = 1.0;
-                        }
-                        else if (val < 0)
-                        {
-                            PKValue.Text = 0.0.ToString(sliderPrecision);
-                            val = 0.0;
-                        }
+		private StackLayout CreateInputs()
+		{
+			AInput = new()
+			{
+				Text = "-4"
+			};
+			BInput = new()
+			{
+				Text = "12"
+			};
+			DInput = new()
+			{
+				Items = { "1", "0.1", "0.01", "0.001" },
+				SelectedIndex = 3
+			};
+			NInput = new()
+			{
+				Text = "60"
+			};
+			PKSlider = new()
+			{
+				MinValue = 0,
+				MaxValue = 1_000_000_000,
+				Value = (int)(1_000_000_000.0 * 0.8),
+				Width = 150,
+				ToolTip = "Prawdopodobieństwo Krzyżowania"
+			};
+			PKValue = new()
+			{
+				Text = 0.8.ToString(sliderPrecision),
+				Width = 80,
+				ToolTip = "Prawdopodobieństwo Krzyżowania"
+			};
 
-                        PKSlider.Value = (int)Math.Round(val * (double)PKSlider.MaxValue);
-                    }
-                    catch (Exception e)
-                    {
-                        SyncPKValueToSlider();
-                    }
-                }
-            };
-            PKSlider.ValueChanged += (sender, args) => SyncPKValueToSlider();
+			PKValue.KeyDown += (sender, args) =>
+			{
+				if (args.Key == Keys.Enter)
+				{
+					try
+					{
+						double val = double.Parse(PKValue.Text);
+						if (val > 1.0)
+						{
+							PKValue.Text = 1.0.ToString(sliderPrecision);
+							val = 1.0;
+						}
+						else if (val < 0)
+						{
+							PKValue.Text = 0.0.ToString(sliderPrecision);
+							val = 0.0;
+						}
 
-            PMSlider = new()
-            {
-                MinValue = 0,
-                MaxValue = 1_000_000_000,
-                Value = (int)(1_000_000_000.0 * 0.005),
-                Width = 150,
-                ToolTip = "Prawdopodobieństwo Mutacji pojedynczego bitu"
-            };
-            PMValue = new()
-            {
-                Text = 0.005.ToString(sliderPrecision),
-                Width = 80,
-                ToolTip = "Prawdopodobieństwo Mutacji pojedynczego bitu"
-            };
+						PKSlider.Value = (int)Math.Round(val * PKSlider.MaxValue);
+					}
+					catch (Exception e)
+					{
+						SyncPKValueToSlider();
+					}
+				}
+			};
+			PKSlider.ValueChanged += (sender, args) => SyncPKValueToSlider();
 
-            PMValue.KeyDown += (sender, args) =>
-            {
-                if (args.Key == Keys.Enter)
-                {
-                    try
-                    {
-                        double val = double.Parse(PMValue.Text);
-                        if (val > 1.0)
-                        {
-                            PMValue.Text = 1.0.ToString(sliderPrecision);
-                            val = 1.0;
-                        }
-                        else if (val < 0)
-                        {
-                            PMValue.Text = 0.0.ToString(sliderPrecision);
-                            val = 0.0;
-                        }
+			PMSlider = new()
+			{
+				MinValue = 0,
+				MaxValue = 1_000_000_000,
+				Value = (int)(1_000_000_000.0 * 0.005),
+				Width = 150,
+				ToolTip = "Prawdopodobieństwo Mutacji pojedynczego bitu"
+			};
+			PMValue = new()
+			{
+				Text = 0.005.ToString(sliderPrecision),
+				Width = 80,
+				ToolTip = "Prawdopodobieństwo Mutacji pojedynczego bitu"
+			};
 
-                        PMSlider.Value = (int)Math.Round(val * (double)PMSlider.MaxValue);
-                    }
-                    catch (Exception e)
-                    {
-                        SyncPMValueToSlider();
-                    }
-                }
-            };
-            PMSlider.ValueChanged += (sender, args) => SyncPMValueToSlider();
+			PMValue.KeyDown += (sender, args) =>
+			{
+				if (args.Key == Keys.Enter)
+				{
+					try
+					{
+						double val = double.Parse(PMValue.Text);
+						if (val > 1.0)
+						{
+							PMValue.Text = 1.0.ToString(sliderPrecision);
+							val = 1.0;
+						}
+						else if (val < 0)
+						{
+							PMValue.Text = 0.0.ToString(sliderPrecision);
+							val = 0.0;
+						}
 
-            StartButton = new()
-            {
-                Text = "START",
-                Command = new Command((sender, args) => ExecuteGeneration())
-            };
+						PMSlider.Value = (int)Math.Round(val * PMSlider.MaxValue);
+					}
+					catch (Exception e)
+					{
+						SyncPMValueToSlider();
+					}
+				}
+			};
+			PMSlider.ValueChanged += (sender, args) => SyncPMValueToSlider();
 
-            var inputs = new StackLayout()
-            {
-                Orientation = Orientation.Horizontal,
-                AlignLabels = true,
-                VerticalContentAlignment = VerticalAlignment.Center,
-                HorizontalContentAlignment = HorizontalAlignment.Center,
-                Padding = 10,
-                Items =
-                {
-                    Label("A:"),
-                    AInput,
-                    SeparationPanel(),
-                    Label("B:"),
-                    BInput,
-                    SeparationPanel(),
-                    Label("D:"),
-                    DInput,
-                    SeparationPanel(),
-                    Label("N:"),
-                    NInput,
-                    SeparationPanel(),
-                    Label("PK", "Prawdopodobieństwo Krzyżowania"),
-                    PKSlider,
-                    PKValue,
-                    SeparationPanel(),
-                    Label("PM", "Prawdopodobieństwo Mutacji pojedynczego bitu"),
-                    PMSlider,
-                    PMValue,
-                    SeparationPanel(),
-                    StartButton
-                }
-            };
+			StartButton = new()
+			{
+				Text = "START",
+				Command = new Command((sender, args) => ExecuteGeneration())
+			};
+
+			var inputs = new StackLayout
+			{
+				Orientation = Orientation.Horizontal,
+				AlignLabels = true,
+				VerticalContentAlignment = VerticalAlignment.Center,
+				HorizontalContentAlignment = HorizontalAlignment.Center,
+				Padding = 10,
+				Items =
+				{
+					Label("A:"),
+					AInput,
+					SeparationPanel(),
+					Label("B:"),
+					BInput,
+					SeparationPanel(),
+					Label("D:"),
+					DInput,
+					SeparationPanel(),
+					Label("N:"),
+					NInput,
+					SeparationPanel(),
+					Label("PK", "Prawdopodobieństwo Krzyżowania"),
+					PKSlider,
+					PKValue,
+					SeparationPanel(),
+					Label("PM", "Prawdopodobieństwo Mutacji pojedynczego bitu"),
+					PMSlider,
+					PMValue,
+					SeparationPanel(),
+					StartButton
+				}
+			};
 
 
-            return inputs;
-        }
-         
-         private void SyncPKValueToSlider()
-         {
-	         double val = PKSlider.Value;
-	         PKValue.Text = (val / (double)PKSlider.MaxValue).ToString(sliderPrecision);
-         }
+			return inputs;
+		}
 
-         private void SyncPMValueToSlider()
-         {
-	         double val = PMSlider.Value;
-	         PMValue.Text = (val / (double)PMSlider.MaxValue).ToString(sliderPrecision);
-         }
+		private void SyncPKValueToSlider()
+		{
+			double val = PKSlider.Value;
+			PKValue.Text = (val / PKSlider.MaxValue).ToString(sliderPrecision);
+		}
+
+		private void SyncPMValueToSlider()
+		{
+			double val = PMSlider.Value;
+			PMValue.Text = (val / PMSlider.MaxValue).ToString(sliderPrecision);
+		}
 	}
 }

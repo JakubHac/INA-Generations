@@ -71,17 +71,10 @@ namespace INA_Generations
 						aggregateHitPercent));
 				}
 
-				ObservableCollection<ClimbersOutput> dataStore =
-					(ObservableCollection<ClimbersOutput>)ClimbersMultiOutputTable.DataStore;
-				dataStore.Clear();
-				foreach (var climbersOutput in AnalysisData)
-				{
-					dataStore.Add(climbersOutput);
-				}
+				ClimbersMultiOutputTable.SetData(AnalysisData);
 
 				ClimbersOutputTable.Visible = false;
 				ClimbersMultiOutputTable.Visible = true;
-				
 				
 				SignalPlot hitPercentPlot = new();
 				hitPercentPlot.Color = Color.LawnGreen;
@@ -131,7 +124,6 @@ namespace INA_Generations
 
 			SignalPlot climbersPlot = new();
 			climbersPlot.Color = Color.LawnGreen;
-			//climbersPlot.FillBelow(Color.Lime, 1f);
 			climbersPlot.SampleRate = 1;
 			climbersPlot.MinRenderIndex = 0;
 			ClimbersPlot.Plot.Add(climbersPlot);
@@ -191,7 +183,6 @@ namespace INA_Generations
 
 			SignalPlot climbersPlot = new();
 			climbersPlot.Color = Color.LawnGreen;
-			//climbersPlot.FillBelow(Color.Lime, 1f);
 			climbersPlot.SampleRate = 1;
 			climbersPlot.MinRenderIndex = 0;
 			ClimbersPlot.Plot.Add(climbersPlot);
@@ -200,12 +191,7 @@ namespace INA_Generations
 			ClimbersPlot.Plot.AxisAuto(0.05f, 0.1f);
 			ClimbersPlot.Plot.Legend(enable: false);
 			ClimbersPlot.Refresh();
-			ObservableCollection<Specimen> dataStore = (ObservableCollection<Specimen>)ClimbersOutputTable.DataStore;
-			dataStore.Clear();
-			foreach (var specimen in progressHistory)
-			{
-				dataStore.Add(specimen);
-			}
+			ClimbersOutputTable.SetData(progressHistory);
 
 			ClimbersOutputTable.Visible = true;
 			ClimbersMultiOutputTable.Visible = false;

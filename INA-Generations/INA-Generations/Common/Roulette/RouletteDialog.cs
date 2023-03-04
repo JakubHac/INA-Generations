@@ -29,7 +29,7 @@ namespace INA_Generations
 		public RouletteDialog(List<(object obj, string displayName, double chance)> chances)
 		{
 			Title = "Koło Fortuny Jakuba Hac. Wszelkie prawa zastrzeżone";
-			Chances = chances.Select(x => (x.obj, x.displayName, new ColorHSB((float)Singleton.Random.NextDouble() * 360f, 1f, 1f, 1f).ToColor(), x.chance)).ToList();
+			Chances = chances.Select(x => (x.obj, x.displayName, new ColorHSB((float)Singleton.Random.NextDouble() * 360f, 1f, 1f).ToColor(), x.chance)).ToList();
 			Bitmap = new(imageSize, imageSize, PixelFormat.Format32bppRgb);
 			Graphics = new(Bitmap);
 			DrawWheel();
@@ -82,7 +82,7 @@ namespace INA_Generations
 				Graphics.DrawText(Fonts.Monospace(36f), Colors.Red, imageSize/2f - 150f, 150, $"{result:0.00000000}" );
 			}
 			Graphics.Flush();
-			Content = new ImageView()
+			Content = new ImageView
 			{
 				Image = Bitmap
 			};

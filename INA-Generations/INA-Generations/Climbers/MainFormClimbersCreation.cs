@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.ObjectModel;
-using Eto.Forms;
+﻿using Eto.Forms;
 using ScottPlot.Eto;
 
 namespace INA_Generations
@@ -44,7 +42,7 @@ namespace INA_Generations
 
 			ClimbersRawDataPage = new()
 			{
-				Content = new StackLayout()
+				Content = new StackLayout
 				{
 					Orientation = Orientation.Vertical,
 					Padding = 10,
@@ -60,7 +58,7 @@ namespace INA_Generations
 
 			ClimbersPlotPage = new()
 			{
-				Content = new StackLayout()
+				Content = new StackLayout
 				{
 					Orientation = Orientation.Vertical,
 					Padding = 10,
@@ -98,53 +96,9 @@ namespace INA_Generations
         {
             ClimbersMultiOutputTable = new()
             {
-                DataStore = new ObservableCollection<ClimbersOutput>(),
-                Width = Width - 42,
-                Columns =
-                {
-                    new GridColumn()
-                    {
-                        HeaderText = "Kroki",
-                        DataCell = new TextBoxCell()
-                        {
-                            Binding = Binding.Property<ClimbersOutput, string>(x => x.NumberOfSteps.ToString())
-                        }
-                    },
-                    new GridColumn()
-                    {
-                        HeaderText = "Ilość Rozwiązań",
-                        DataCell = new TextBoxCell()
-                        {
-                            Binding = Binding.Property<ClimbersOutput, string>(x => x.NumberOfSolutions.ToString())
-                        }
-                    },
-                    new GridColumn()
-                    {
-                        HeaderText = "Procent Ilości Rozwiązań",
-                        DataCell = new TextBoxCell()
-                        {
-                            Binding = Binding.Property<ClimbersOutput, string>(x => x.HitPercent.ToString("P"))
-                        }
-                    },
-                    new GridColumn()
-                    {
-                        HeaderText = "Kumulatywna Ilość rozwiązań",
-                        DataCell = new TextBoxCell()
-                        {
-                            Binding = Binding.Property<ClimbersOutput, string>(x =>
-                                x.AggregateNumberOfSolutions.ToString())
-                        }
-                    },
-                    new GridColumn()
-                    {
-                        HeaderText = "Kumulatywny Procent Rozwiązań",
-                        DataCell = new TextBoxCell()
-                        {
-                            Binding = Binding.Property<ClimbersOutput, string>(x => x.AggregateHitPercent.ToString("P"))
-                        }
-                    }
-                }
+	            Width = Width - 42
             };
+            ClimbersMultiOutputTable.AddColumns<ClimbersOutput>();
         }
 
         private StackLayout CreateClimbersInputs()
@@ -184,7 +138,7 @@ namespace INA_Generations
             Climbers_StartButton = new()
             {
                 Text = "Start",
-                Command = new Command((object sender, EventArgs e) => ExecuteClimbers())
+                Command = new Command((_, _) => ExecuteClimbers())
             };
             Climbers_TargetFunctionDropdown = new()
             {
@@ -197,7 +151,7 @@ namespace INA_Generations
                 Orientation = Orientation.Vertical,
                 Items =
                 {
-                    new StackLayout()
+                    new StackLayout
                     {
                         Orientation = Orientation.Horizontal,
                         AlignLabels = true,
@@ -224,8 +178,7 @@ namespace INA_Generations
                             Climbers_StartButton
                         }
                     },
-                    Label(
-                        "Dla T = 1, wykres jest do pętli wewnętrznej, dla T > 1 wykres jest dla pętli zewnętrznej")
+                    Label("Dla T = 1, wykres jest do pętli wewnętrznej, dla T > 1 wykres jest dla pętli zewnętrznej")
                 }
             };
         }
@@ -234,36 +187,9 @@ namespace INA_Generations
         {
             ClimbersOutputTable = new()
             {
-                DataStore = new ObservableCollection<Specimen>(),
-                Width = Width - 42,
-                Columns =
-                {
-                    new GridColumn()
-                    {
-                        HeaderText = "xReal",
-                        DataCell = new TextBoxCell()
-                        {
-                            Binding = Binding.Property<Specimen, string>(x => x.xReal.ToString())
-                        }
-                    },
-                    new GridColumn()
-                    {
-                        HeaderText = "xBin",
-                        DataCell = new TextBoxCell()
-                        {
-                            Binding = Binding.Property<Specimen, string>(x => x.XBin.ToString())
-                        }
-                    },
-                    new GridColumn()
-                    {
-                        HeaderText = "F(x)",
-                        DataCell = new TextBoxCell()
-                        {
-                            Binding = Binding.Property<Specimen, string>(x => x.Fx.ToString())
-                        }
-                    }
-                }
+	            Width = Width - 42
             };
+            ClimbersOutputTable.AddColumns<Specimen>();
         }
 	}
 }

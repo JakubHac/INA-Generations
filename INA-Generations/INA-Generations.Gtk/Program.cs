@@ -1,4 +1,5 @@
 ﻿using System;
+using Eto;
 using Eto.Forms;
 
 namespace INA_Generations.Gtk
@@ -8,7 +9,7 @@ namespace INA_Generations.Gtk
 		[STAThread]
 		public static void Main(string[] args)
 		{
-			Singleton.Platform = Eto.Platforms.Gtk;
+			Singleton.Platform = Platforms.Gtk;
 			new Application(Singleton.Platform).Run(new MainForm());
 		}
 	}

@@ -6,7 +6,7 @@
 		{
 			Specimen tester = new(0);
 			double bestSoFar = Singleton.TargetFunction == TargetFunction.Max ? double.MinValue : double.MaxValue;
-			while (tester.xReal <= Singleton.b)
+			while (tester.XReal <= Singleton.b)
 			{
 				switch (Singleton.TargetFunction)
 				{

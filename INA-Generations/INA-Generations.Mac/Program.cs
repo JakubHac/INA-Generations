@@ -1,4 +1,5 @@
 ﻿using System;
+using Eto;
 using Eto.Forms;
 
 namespace INA_Generations.Mac
@@ -8,7 +9,7 @@ namespace INA_Generations.Mac
 		[STAThread]
 		public static void Main(string[] args)
 		{
-			Singleton.Platform = Eto.Platforms.Mac64;
+			Singleton.Platform = Platforms.Mac64;
 			new Application(Singleton.Platform).Run(new MainForm());
 		}
 	}

@@ -42,10 +42,6 @@ namespace INA_Generations
 			SyncPKValueToSlider();
 			SyncPMValueToSlider();
 
-			// GroupingCancellationTokenSource.Cancel();
-			// GroupingCancellationTokenSource = new CancellationTokenSource();
-			// GroupingCancellationToken = CancellationToken.None;
-
 			Singleton.PK = PKSlider.Value / (double)PKSlider.MaxValue;
 			Singleton.PM = PMSlider.Value / (double)PMSlider.MaxValue;
 
@@ -73,8 +69,8 @@ namespace INA_Generations
 			bool addDataAtStart = Singleton.RandomRoulette != RouletteType.Disabled;
 
 			LOutput.Text = l.ToString();
-			ClearOutputTable();
-			ClearGroupOutputTable();
+			OutputTable.ClearData<DataRow>();
+			GroupedOutputTable.ClearData<GroupDataRow>();
 			bool isBenchmarkRun = BenchmarkCheckbox.Checked.Value && t == 1;
 			Stopwatch benchmark = isBenchmarkRun ? Stopwatch.StartNew() : null;
 			Stopwatch benchmark_total = isBenchmarkRun ? Stopwatch.StartNew() : null;
@@ -90,7 +86,7 @@ namespace INA_Generations
 
 			if (addDataAtStart)
 			{
-				AddDataToTable(data);
+				OutputTable.SetData(data);
 			}
 
 			for (int i = 0; i < t; i++)
@@ -178,7 +174,7 @@ namespace INA_Generations
 
 			if (!addDataAtStart)
 			{
-				AddDataToTable(data);
+				OutputTable.SetData(data);
 			}
 
 			MinGxPlot.Ys = MinFx.ToArray();
@@ -190,6 +186,8 @@ namespace INA_Generations
 
 			Plot.Plot.AxisAuto(0.05f, 0.1f);
 			Plot.Refresh();
+			
+			GroupData(data);
 
 			if (isBenchmarkRun)
 			{
@@ -203,13 +201,6 @@ namespace INA_Generations
 			{
 				MessageBox.Show(benchmarks, "Benchmark Results", MessageBoxType.Question);
 			}
-
-			AddGroupDataToTable(new GroupDataRow[]
-			{
-				new() { xBinValue = "grupowanie odbywa się na osobnym wątku, chwilę trzeba poczekać" }
-			});
-			// GroupingCancellationToken = GroupingCancellationTokenSource.Token;
-			// Task.Run(() => GroupData(data, GroupingCancellationToken), GroupingCancellationToken);
 			
 			void InitPlot(DataRow[] data, out List<double> MinFx, out List<double> MaxFx, out List<double> AvgFx, out SignalPlot MinGxPlot,
 				out SignalPlot AvgGxPlot, out SignalPlot MaxGxPlot)
@@ -272,18 +263,13 @@ namespace INA_Generations
 			}
 		}
 
-		private void GroupData(DataRow[] data, CancellationToken token)
+		private void GroupData(DataRow[] data)
 		{
 			try
 			{
 				Dictionary<double, long> XRealCounts = new();
 				foreach (var dataRow in data)
 				{
-					if (token.IsCancellationRequested)
-					{
-						return;
-					}
-
 					if (XRealCounts.ContainsKey(dataRow.FinalXRealValue))
 					{
 						XRealCounts[dataRow.FinalXRealValue]++;
@@ -300,12 +286,7 @@ namespace INA_Generations
 
 				foreach (var xRealCount in XRealCounts)
 				{
-					if (token.IsCancellationRequested)
-					{
-						return;
-					}
-
-					sortedGroups.Add(new(xRealCount.Key, xRealCount.Value / dataCountAsDouble,
+						sortedGroups.Add(new(xRealCount.Key, xRealCount.Value / dataCountAsDouble,
 						MathHelper.Fx(xRealCount.Key)));
 				}
 
@@ -318,16 +299,11 @@ namespace INA_Generations
 				long i = 0;
 				foreach (var group in groupsData)
 				{
-					if (token.IsCancellationRequested)
-					{
-						return;
-					}
-
 					Groups[i] = new(i + 1, group.XReal, group.Percent);
 					i++;
 				}
 
-				Application.Instance.InvokeAsync(() => AddGroupDataToTable(Groups));
+				GroupedOutputTable.SetData(Groups);
 			}
 			catch (Exception e)
 			{
@@ -375,7 +351,7 @@ namespace INA_Generations
 			Parallel.ForEach(data, dataRow =>
 			{
 				dataRow.MutatedGenesValue = new();
-				char[] chromosome = dataRow.AfterChild.Item2.ToCharArray();
+				char[] chromosome = dataRow.AfterChild.ToCharArray();
 				for (int j = 0; j < Singleton.l; j++)
 				{
 					if (Singleton.Random.NextDouble() < Singleton.PM)
@@ -449,15 +425,14 @@ namespace INA_Generations
 			data[index].ReplacedByElite = true;
 			data[index].MutatedChromosomeValue = MathHelper.XIntToXBin(eliteXInt);
 		}
-
-		[SuppressMessage("ReSharper.DPA", "DPA0001: Memory allocation issues")]
+		
 		private void Fuck(DataRow[] data)
 		{
 			Parallel.ForEach(data, dataRow =>
 			{
 				if (dataRow.ParentsWith == null) return;
 				dataRow.ChildXBin =
-					$"{dataRow.FirstParentXBin.Item2.Substring(0, dataRow.PCValue.Value)} | {dataRow.SecondParentXBin.Item2.Substring(dataRow.PCValue.Value)}";
+					$"{dataRow.FirstParentXBin.Substring(0, dataRow.PCValue.Value)} | {dataRow.SecondParentXBin.Substring(dataRow.PCValue.Value)}";
 			});
 		}
 
@@ -481,8 +456,8 @@ namespace INA_Generations
 						{
 							possiblePC.Add((
 								j,
-								$"{dataRow.FirstParentXBin.Item2.Substring(0, j)} | {dataRow.SecondParentXBin.Item2.Substring(j)}"
-								, 1f / ((float)Singleton.l - 1f)));
+								$"{dataRow.FirstParentXBin.Substring(0, j)} | {dataRow.SecondParentXBin.Substring(j)}"
+								, 1f / (Singleton.l - 1f)));
 						}
 
 						var result = Singleton.GetRandomWithRoulette(possiblePC);
@@ -559,7 +534,7 @@ namespace INA_Generations
 							long selectedIndex = MathHelper.BinarySearchForQ(data, row.SelectionRandom);
 							if (selectedIndex == -1)
 							{
-								MessageBox.Show($"Iter Limit Reached for {row.SelectionRandom}");
+								MessageBox.Show($"Osiągnięto limit iteracji: {row.SelectionRandom}");
 								selectedIndex = 0;
 							}
 

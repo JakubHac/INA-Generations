@@ -1,5 +1,6 @@
 ﻿using System;
-using Eto.Drawing;
+using System.Linq;
+using System.Reflection;
 using Eto.Forms;
 
 namespace INA_Generations
@@ -55,7 +56,7 @@ namespace INA_Generations
                 }
             };
 
-            this.SizeChanged += (sender, args) => { RefreshItemsSize(); };
+            SizeChanged += (sender, args) => { RefreshItemsSize(); };
         }
 
         private void TabsControlOnSelectedIndexChanged(object sender, EventArgs e)
@@ -63,7 +64,7 @@ namespace INA_Generations
             switch (TabsControl.SelectedIndex)
             {
                 case 0:
-                    RawDataPage.Content = new StackLayout()
+                    RawDataPage.Content = new StackLayout
                     {
                         Orientation = Orientation.Vertical,
                         Padding = 10,
@@ -76,7 +77,7 @@ namespace INA_Generations
                     };
                     break;
                 case 1:
-                    PlotPage.Content = new StackLayout()
+                    PlotPage.Content = new StackLayout
                     {
                         Orientation = Orientation.Vertical,
                         Padding = 10,
@@ -89,7 +90,7 @@ namespace INA_Generations
                     };
                     break;
                 case 2:
-                    GroupedResultsPage.Content = new StackLayout()
+                    GroupedResultsPage.Content = new StackLayout
                     {
                         Orientation = Orientation.Vertical,
                         Padding = 10,
@@ -102,7 +103,7 @@ namespace INA_Generations
                     };
                     break;
                 case 4:
-                    ClimbersRawDataPage.Content = new StackLayout()
+                    ClimbersRawDataPage.Content = new StackLayout
                     {
                         Orientation = Orientation.Vertical,
                         Padding = 10,
@@ -115,7 +116,7 @@ namespace INA_Generations
                     };
                     break;
                 case 5:
-                    ClimbersPlotPage.Content = new StackLayout()
+                    ClimbersPlotPage.Content = new StackLayout
                     {
                         Orientation = Orientation.Vertical,
                         Padding = 10,
@@ -153,6 +154,5 @@ namespace INA_Generations
                 Width = inputsSeparation
             };
         }
-        
     }
 }

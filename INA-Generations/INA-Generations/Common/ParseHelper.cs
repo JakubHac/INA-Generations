@@ -42,7 +42,7 @@ namespace INA_Generations
 			{
 				longArray = text.Split(';').Where(x => x.Trim().Length > 0).Select(x =>
 				{
-					ParseHelper.ParseLong(x, fieldName, out long n);
+					ParseLong(x, fieldName, out long n);
 					return n;
 				}).ToArray();
 
@@ -62,7 +62,7 @@ namespace INA_Generations
 			{
 				doubleArray = text.Split(';').Where(x => x.Trim().Length > 0).Select(x =>
 				{
-					ParseHelper.ParseDouble(x, fieldName, out double n);
+					ParseDouble(x, fieldName, out double n);
 					return n;
 				}).ToArray();
 
