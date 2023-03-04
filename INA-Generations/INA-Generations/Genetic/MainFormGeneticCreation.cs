@@ -30,6 +30,9 @@ namespace INA_Generations
 		private DropDown RouletteTypeDropdown;
 		private DropDown TargetFunctionDropdown;
 
+		/// <summary>
+		/// Creates all the controls needed for genetic algorithm
+		/// </summary>
 		private void CreateGenetics()
 		{
 			Inputs = CreateInputs();
@@ -106,6 +109,10 @@ namespace INA_Generations
 			};
 		}
 
+		/// <summary>
+		/// Creates the secondary inputs for genetic algorithm
+		/// </summary>
+		/// <returns></returns>
 		private StackLayout CreateSecondaryInputs()
 		{
 			LOutput = new()
@@ -171,77 +178,34 @@ namespace INA_Generations
 			};
 		}
 
-		// private void ClearOutputTable()
-		// {
-		// 	OutputTable.DataStore = Array.Empty<DataRow>();
-		// }
-
-		// private void ClearGroupOutputTable()
-		// {
-		// 	GroupedOutputTable.DataStore = Array.Empty<GroupDataRow>();
-		// }
-
-		// private void AddDataToTable(DataRow[] data)
-		// {
-		// 	OutputTable.DataStore = data;
-		// }
-
-		// private void AddGroupDataToTable(GroupDataRow[] dataGroups)
-		// {
-		// 	GroupedOutputTable.DataStore = dataGroups;
-		// }
-
+		/// <summary>
+		/// Creates the output table for genetic algorithm
+		/// </summary>
 		private void CreateOutputTable()
 		{
 			OutputTable = new()
 			{
-				//DataStore = new DataRow[0],
 				Width = Width - 42
 			};
 			OutputTable.AddColumns<DataRow>();
-
-			// foreach (PropertyInfo property in typeof(DataRow).GetProperties())
-			// {
-			// 	if (property.PropertyType != typeof((string, string))) continue;
-			//
-			// 	OutputTable.Columns.Add(new()
-			// 	{
-			// 		HeaderText = property.Name,
-			// 		DataCell = new TextBoxCell()
-			// 		{
-			// 			Binding = Binding.Property<DataRow, string>(x =>
-			// 				(((string, string value))property.GetValue(x)).value)
-			// 		}
-			// 	});
-			// }
 		}
 
+		/// <summary>
+		/// Creates the table for the grouped output of the genetic algorithm
+		/// </summary>
 		private void CreateGroupedOutputTable()
 		{
 			GroupedOutputTable = new()
 			{
-				//DataStore = new GroupDataRow[0],
 				Width = Width - 42
 			};
-			
 			GroupedOutputTable.AddColumns<GroupDataRow>();
-
-			// foreach (PropertyInfo property in typeof(GroupDataRow).GetProperties())
-			// {
-			// 	if (property.PropertyType != typeof((string, string))) continue;
-			// 	
-			// 	GroupedOutputTable.Columns.Add(new()
-			// 	{
-			// 		HeaderText = property.Name,
-			// 		DataCell = new TextBoxCell()
-			// 		{
-			// 			Binding = Binding.Property<GroupDataRow, string>(x =>
-			// 				(((string, string value))property.GetValue(x)).value)
-			// 		}
-			// 	});
-			// }
 		}
 
+		/// <summary>
+		/// Creates the inputs for genetic algorithm
+		/// </summary>
+		/// <returns></returns>
 		private StackLayout CreateInputs()
 		{
 			AInput = new()
@@ -390,12 +354,18 @@ namespace INA_Generations
 			return inputs;
 		}
 
+		/// <summary>
+		/// Synchronizes the PK value with slider
+		/// </summary>
 		private void SyncPKValueToSlider()
 		{
 			double val = PKSlider.Value;
 			PKValue.Text = (val / PKSlider.MaxValue).ToString(sliderPrecision);
 		}
 
+		/// <summary>
+		/// Synchronizes the PM value with slider
+		/// </summary>
 		private void SyncPMValueToSlider()
 		{
 			double val = PMSlider.Value;

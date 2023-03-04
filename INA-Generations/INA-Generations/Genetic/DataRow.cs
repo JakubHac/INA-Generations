@@ -62,11 +62,18 @@ namespace INA_Generations
 			Index = index;
 		}
 
+		/// <summary>
+		/// Randomizes SelectionRandom value
+		/// </summary>
+		/// <param name="skipRoulette">Whether to use the animated roulette or not</param>
 		public void RandomizeSelection(bool skipRoulette = false)
 		{
 			SelectionRandom = skipRoulette ? Singleton.Random.NextDouble() : Singleton.GetRandomWithRoulette();
 		}
 
+		/// <summary>
+		/// Randomizes ParentRandom value
+		/// </summary>
 		public void RandomizeParenting()
 		{
 			switch (Singleton.RandomRoulette)

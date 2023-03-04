@@ -37,6 +37,10 @@ namespace INA_Generations
 			Application.Instance.InvokeAsync(Animate);
 		}
 
+		/// <summary>
+		/// Draws the wheel with the given offset
+		/// </summary>
+		/// <param name="offset">offset angle in degrees</param>
 		private void DrawWheel(double offset = 0f)
 		{
 			Graphics.Clear(Colors.White);
@@ -89,6 +93,9 @@ namespace INA_Generations
 			Value = result;
 		}
 
+		/// <summary>
+		/// Animate the wheel
+		/// </summary>
 		public async Task Animate()
 		{
 			try
@@ -112,8 +119,6 @@ namespace INA_Generations
 			{
 				MessageBox.Show(e.ToString());
 			}
-
-			
 		}
 	}
 }

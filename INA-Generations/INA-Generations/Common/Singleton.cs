@@ -19,6 +19,9 @@ namespace INA_Generations
 		public static double d = 0.001;
 		public static int l;
 		
+		/// <summary>
+		/// Returns a random xReal value from the interval [a, b]
+		/// </summary>
 		public static double RandomXReal()
 		{
 			int accuracy = MathHelper.Accuracy(d);
@@ -26,6 +29,10 @@ namespace INA_Generations
 			return Math.Round(truexReal, accuracy);
 		}
 		
+		/// <summary>
+		/// Uses an animated roulette to get a random value
+		/// </summary>
+		/// <returns></returns>
 		public static double GetRandomWithRoulette()
 		{
 			if (RandomRoulette == RouletteType.Disabled) return Random.NextDouble();
@@ -34,6 +41,11 @@ namespace INA_Generations
 			return roulette.Value;
 		}
 		
+		/// <summary>
+		/// Uses an animated roulette to select a random value from a list
+		/// </summary>
+		/// <param name="chances">Definitions of values to be displayed on the roulette</param>
+		/// <returns>Selected value and r from interval [0,1] that was used to select the value</returns>
 		public static (T result, double r) GetRandomWithRoulette<T>(List<(T obj, string displayName, double chance)> chances)
 		{
 			double sumChance = chances.Sum(x => x.chance);

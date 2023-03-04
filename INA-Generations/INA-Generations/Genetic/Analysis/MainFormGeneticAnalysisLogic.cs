@@ -66,8 +66,7 @@ namespace INA_Generations
 				List<double> FXs = new();
 				for (long i = 0; i < iters; i++)
 				{
-					DataRow[] data = new DataRow[Ns[l1]];
-					CreateInitialData(data, Ns[l1]);
+					DataRow[] data = CreateInitialData(Ns[l1]);
 
 					for (int j = 0; j < Ts[l2]; j++)
 					{

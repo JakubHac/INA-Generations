@@ -8,6 +8,9 @@ namespace INA_Generations;
 
 public static class GridViewExtensions
 {
+	/// <summary>
+	/// Adds columns to the grid view based on the properties and fields of the given type.
+	/// </summary>
 	public static void AddColumns<T>(this GridView gridView) where T : class
 	{
 		gridView.ClearData<T>();
@@ -37,11 +40,18 @@ public static class GridViewExtensions
 		}
 	}
 
+	/// <summary>
+	/// Sets the data store of the grid view to the given data.
+	/// </summary>
+	/// <param name="data">Data to display in the grid view</param>
 	public static void SetData<T>(this GridView gridView, IEnumerable<T> data) where T : class
 	{
 		gridView.DataStore = new ObservableCollection<T>(data);
 	}
 	
+	/// <summary>
+	/// Clears the data store of the grid view and sets it to an empty collection.
+	/// </summary>
 	public static void ClearData<T>(this GridView gridView) where T : class
 	{
 		gridView.DataStore = new ObservableCollection<T>();

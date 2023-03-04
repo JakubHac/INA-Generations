@@ -44,7 +44,7 @@ namespace INA_Generations
                 }
             };
 
-            TabsControl.SelectedIndexChanged += TabsControlOnSelectedIndexChanged;
+            TabsControl.SelectedIndexChanged += MoveCommonElementsToSelectedTab;
 
             Content = new StackLayout
             {
@@ -56,10 +56,13 @@ namespace INA_Generations
                 }
             };
 
-            SizeChanged += (sender, args) => { RefreshItemsSize(); };
+            SizeChanged += (_, _) => { RefreshItemsSize(); };
         }
 
-        private void TabsControlOnSelectedIndexChanged(object sender, EventArgs e)
+        /// <summary>
+        /// Moves common elements to the selected tab
+        /// </summary>
+        private void MoveCommonElementsToSelectedTab(object sender, EventArgs e)
         {
             switch (TabsControl.SelectedIndex)
             {
@@ -130,6 +133,11 @@ namespace INA_Generations
             }
         }
         
+        /// <summary>
+        /// Creates a label with a tooltip
+        /// </summary>
+        /// <param name="text">Label text</param>
+        /// <param name="tooltip">Tooltip text</param>
         Label Label(string text, string tooltip = null)
         {
             if (tooltip == null)
@@ -147,6 +155,9 @@ namespace INA_Generations
             };
         }
 
+        /// <summary>
+        /// Creates a standardized separation panel
+        /// </summary>
         Panel SeparationPanel()
         {
             return new()

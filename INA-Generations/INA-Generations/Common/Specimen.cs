@@ -11,6 +11,9 @@
 		[DisplayInGridView("F(x)")]
 		public double Fx;
 
+		/// <summary>
+		/// Randomly generated specimen
+		/// </summary>
 		public Specimen()
 		{
 			XReal = Singleton.RandomXReal();
@@ -19,6 +22,10 @@
 			Fx = MathHelper.Fx(XReal);
 		}
 		
+		/// <summary>
+		/// Creates specimen from xReal
+		/// </summary>
+		/// <param name="xReal">xReal value of the specimen</param>
 		public Specimen(double xReal)
 		{
 			XReal = xReal;
@@ -27,6 +34,10 @@
 			Fx = MathHelper.Fx(xReal);
 		}
 		
+		/// <summary>
+		/// Creates specimen from xInt
+		/// </summary>
+		/// <param name="xInt">xInt value of the specimen</param>
 		public Specimen(long xInt)
 		{
 			XInt = xInt;
@@ -35,6 +46,10 @@
 			Fx = MathHelper.Fx(XReal);
 		}
 		
+		/// <summary>
+		/// Creates specimen from xBin
+		/// </summary>
+		/// <param name="xBin">xBin value of the specimen</param>
 		public Specimen(string xBin)
 		{
 			XBin = xBin;

@@ -74,15 +74,15 @@ namespace INA_Generations
 			bool isBenchmarkRun = BenchmarkCheckbox.Checked.Value && t == 1;
 			Stopwatch benchmark = isBenchmarkRun ? Stopwatch.StartNew() : null;
 			Stopwatch benchmark_total = isBenchmarkRun ? Stopwatch.StartNew() : null;
-			DataRow[] data = new DataRow[n];
-			CreateInitialData(data, n);
+			DataRow[] data = CreateInitialData(n);
 			string benchmarks = "";
 			if (isBenchmarkRun)
 			{
 				benchmarks = $"Creating Random Data: {benchmark.ElapsedMilliseconds}[ms]\n";
 			}
 
-			InitPlot(data, out var MinFx, out var MaxFx, out var AvgFx, out var MinGxPlot, out var AvgGxPlot, out var MaxGxPlot);
+			InitPlot(data, out var MinFx, out var MaxFx, out var AvgFx, out var MinGxPlot, out var AvgGxPlot,
+				out var MaxGxPlot);
 
 			if (addDataAtStart)
 			{
@@ -140,7 +140,7 @@ namespace INA_Generations
 					benchmark.Restart();
 				}
 
-				Fuck(data);
+				CreateChildren(data);
 				if (isBenchmarkRun)
 				{
 					benchmarks += $"Children: {benchmark.ElapsedMilliseconds}[ms]\n";
@@ -186,7 +186,7 @@ namespace INA_Generations
 
 			Plot.Plot.AxisAuto(0.05f, 0.1f);
 			Plot.Refresh();
-			
+
 			GroupData(data);
 
 			if (isBenchmarkRun)
@@ -201,8 +201,9 @@ namespace INA_Generations
 			{
 				MessageBox.Show(benchmarks, "Benchmark Results", MessageBoxType.Question);
 			}
-			
-			void InitPlot(DataRow[] data, out List<double> MinFx, out List<double> MaxFx, out List<double> AvgFx, out SignalPlot MinGxPlot,
+
+			void InitPlot(DataRow[] data, out List<double> MinFx, out List<double> MaxFx, out List<double> AvgFx,
+				out SignalPlot MinGxPlot,
 				out SignalPlot AvgGxPlot, out SignalPlot MaxGxPlot)
 			{
 				MinFx = new();
@@ -263,6 +264,10 @@ namespace INA_Generations
 			}
 		}
 
+		/// <summary>
+		/// Groups data by XRealValue and calculates percent of each group
+		/// </summary>
+		/// <param name="data">input data</param>
 		private void GroupData(DataRow[] data)
 		{
 			try
@@ -286,7 +291,7 @@ namespace INA_Generations
 
 				foreach (var xRealCount in XRealCounts)
 				{
-						sortedGroups.Add(new(xRealCount.Key, xRealCount.Value / dataCountAsDouble,
+					sortedGroups.Add(new(xRealCount.Key, xRealCount.Value / dataCountAsDouble,
 						MathHelper.Fx(xRealCount.Key)));
 				}
 
@@ -311,15 +316,25 @@ namespace INA_Generations
 			}
 		}
 
-		private void CreateInitialData(DataRow[] data, long n)
+		/// <summary>
+		/// Randomly generates initial data
+		/// </summary>
+		/// <param name="n">Size of the initial data</param>
+		private DataRow[] CreateInitialData(long n)
 		{
+			DataRow[] data = new DataRow[n];
 			Parallel.For(0, n, i =>
 			{
 				Specimen specimen = new();
 				data[i] = new(specimen, i + 1);
 			});
+			return data;
 		}
 
+		/// <summary>
+		/// Initializes data for the next generation
+		/// </summary>
+		/// <param name="data"></param>
 		private void MoveDataToNextGeneration(DataRow[] data)
 		{
 			for (int i = 0; i < data.Length; i++)
@@ -327,7 +342,11 @@ namespace INA_Generations
 				data[i] = new(new(data[i].FinalXRealValue), data[i].Index);
 			}
 		}
-		
+
+		/// <summary>
+		/// Finalizes the data values after the genetic algorithm
+		/// </summary>
+		/// <param name="data">current generation</param>
 		private void Finalize(DataRow[] data)
 		{
 			Parallel.ForEach(data, row =>
@@ -337,13 +356,18 @@ namespace INA_Generations
 			});
 		}
 
+		/// <summary>
+		/// Mutates the specimens in the current generation
+		/// </summary>
+		/// <param name="data">current generation</param>
+		/// <param name="elite">whether to keep the best specimen if all of the mutated specimens are worse</param>
 		private void Mutate(DataRow[] data, bool elite)
 		{
 			long eliteXInt = 0;
 			double bestFx = 0;
 			if (elite)
 			{
-				eliteXInt = FindElite(data, eliteXInt, ref bestFx);
+				FindElite(data, ref eliteXInt, ref bestFx);
 			}
 
 			bool eliteMadeIt = !elite;
@@ -363,46 +387,57 @@ namespace INA_Generations
 
 				string xBin = new(chromosome);
 				dataRow.MutatedChromosomeValue = xBin;
-				eliteMadeIt = CheckIfEliteAlreadyMadeIt(eliteMadeIt, xBin, eliteXInt, bestFx);
+				eliteMadeIt = eliteMadeIt || CheckIfEliteOrBetter(xBin, eliteXInt, bestFx);
 			});
 
 
 			ReplaceWithEliteIfNecessary(data, elite, eliteMadeIt, eliteXInt);
 		}
 
-		private static bool CheckIfEliteAlreadyMadeIt(bool eliteMadeIt, string xBin, long eliteXInt, double bestFx)
+		/// <summary>
+		/// Checks if the input specimen is better than the elite specimen
+		/// </summary>
+		/// <param name="xBin">input specimen xBin</param>
+		/// <param name="eliteXInt">elite specimen xInt</param>
+		/// <param name="bestFx">elite specimen F(x)</param>
+		private static bool CheckIfEliteOrBetter(string xBin, long eliteXInt, double bestFx)
 		{
-			if (!eliteMadeIt)
+			bool eliteMadeIt = false;
+			long xInt = MathHelper.XBinToXInt(xBin);
+			if (xInt == eliteXInt)
 			{
-				long xInt = MathHelper.XBinToXInt(xBin);
-				if (xInt == eliteXInt)
+				eliteMadeIt = true;
+				return eliteMadeIt;
+			}
+
+			double xReal = MathHelper.XIntToXReal(xInt);
+			double Fx = MathHelper.Fx(xReal);
+			if (Singleton.TargetFunction == TargetFunction.Max)
+			{
+				if (Fx > bestFx)
 				{
 					eliteMadeIt = true;
-					return eliteMadeIt;
-				}
-
-				double xReal = MathHelper.XIntToXReal(xInt);
-				double Fx = MathHelper.Fx(xReal);
-				if (Singleton.TargetFunction == TargetFunction.Max)
-				{
-					if (Fx > bestFx)
-					{
-						eliteMadeIt = true;
-					}
-				}
-				else
-				{
-					if (Fx < bestFx)
-					{
-						eliteMadeIt = true;
-					}
 				}
 			}
+			else
+			{
+				if (Fx < bestFx)
+				{
+					eliteMadeIt = true;
+				}
+			}
+
 
 			return eliteMadeIt;
 		}
 
-		private static long FindElite(DataRow[] data, long eliteXInt, ref double bestFx)
+		/// <summary>
+		/// Finds the elite specimen
+		/// </summary>
+		/// <param name="data">current generation</param>
+		/// <param name="eliteXInt">elite specimen xInt</param>
+		/// <param name="bestFx">elite specimen F(x)</param>
+		private static void FindElite(DataRow[] data, ref long eliteXInt, ref double bestFx)
 		{
 			double bestGX = Double.MinValue;
 			foreach (var row in data)
@@ -414,10 +449,15 @@ namespace INA_Generations
 					bestFx = row.OriginalSpecimen.Fx;
 				}
 			}
-
-			return eliteXInt;
 		}
 
+		/// <summary>
+		/// If the elite specimen didn't make it through mutation, replaces a random specimen with the elite specimen
+		/// </summary>
+		/// <param name="data">current generation</param>
+		/// <param name="elite">if the user wants the elite specimen to be carried over</param>
+		/// <param name="eliteMadeIt">if the elite specimen made it through the mutation process</param>
+		/// <param name="eliteXInt">elite xInt value</param>
 		private static void ReplaceWithEliteIfNecessary(DataRow[] data, bool elite, bool eliteMadeIt, long eliteXInt)
 		{
 			if (!elite || eliteMadeIt) return;
@@ -425,8 +465,12 @@ namespace INA_Generations
 			data[index].ReplacedByElite = true;
 			data[index].MutatedChromosomeValue = MathHelper.XIntToXBin(eliteXInt);
 		}
-		
-		private void Fuck(DataRow[] data)
+
+		/// <summary>
+		/// Use parents to create children in the current generation
+		/// </summary>
+		/// <param name="data">current generation</param>
+		private void CreateChildren(DataRow[] data)
 		{
 			Parallel.ForEach(data, dataRow =>
 			{
@@ -436,6 +480,10 @@ namespace INA_Generations
 			});
 		}
 
+		/// <summary>
+		/// Randomizes the PC value for each parent
+		/// </summary>
+		/// <param name="data">current generation</param>
 		private void RandomizePC(DataRow[] data)
 		{
 			foreach (var dataRow in data)
@@ -468,6 +516,10 @@ namespace INA_Generations
 			}
 		}
 
+		/// <summary>
+		/// Pairs parents with each other
+		/// </summary>
+		/// <param name="data">current generation</param>
 		private void PairParents(DataRow[] data)
 		{
 			for (int i = 0; i < data.Length; i++)
@@ -493,6 +545,10 @@ namespace INA_Generations
 			}
 		}
 
+		/// <summary>
+		/// Chooses parents for the current generation
+		/// </summary>
+		/// <param name="data">current generation</param>
 		private void Parenting(DataRow[] data)
 		{
 			switch (Singleton.RandomRoulette)
@@ -506,7 +562,6 @@ namespace INA_Generations
 						row.RandomizeParenting();
 						OutputTable.Invalidate();
 					}
-
 					break;
 				case RouletteType.PieChart:
 					foreach (var row in data)
@@ -514,13 +569,14 @@ namespace INA_Generations
 						row.RandomizeParenting();
 						OutputTable.Invalidate();
 					}
-
 					break;
-				default:
-					throw new ArgumentOutOfRangeException();
 			}
 		}
 
+		/// <summary>
+		/// Simulates natural selection
+		/// </summary>
+		/// <param name="data">current generation</param>
 		private void Selection(DataRow[] data)
 		{
 			switch (Singleton.RandomRoulette)
@@ -563,7 +619,6 @@ namespace INA_Generations
 						row.SelectionValue = data[selectedIndex].OriginalSpecimen;
 						OutputTable.Invalidate();
 					}
-
 					break;
 				case RouletteType.PieChart:
 					List<(Specimen OriginalSpecimen, string xBin_xInt, double Px)> chances =
@@ -575,13 +630,14 @@ namespace INA_Generations
 						row.SelectionValue = result.result;
 						OutputTable.Invalidate();
 					}
-
 					break;
-				default:
-					throw new ArgumentOutOfRangeException();
 			}
 		}
 
+		/// <summary>
+		/// Calculates Qx for each specimen
+		/// </summary>
+		/// <param name="data">current generation</param>
 		private void CalculateQx(DataRow[] data)
 		{
 			double sum = 0.0;
@@ -592,12 +648,20 @@ namespace INA_Generations
 			}
 		}
 
+		/// <summary>
+		/// calculates Px for each specimen
+		/// </summary>
+		/// <param name="data">current generation</param>
 		private void CalculatePx(DataRow[] data)
 		{
 			double sum = data.Sum(x => x.GxValue);
 			Parallel.ForEach(data, dataRow => { dataRow.PxValue = dataRow.GxValue / sum; });
 		}
 
+		/// <summary>
+		/// calculates Gx for each specimen
+		/// </summary>
+		/// <param name="data">current generation</param>
 		private static void CalculateGx(DataRow[] data)
 		{
 			switch (Singleton.TargetFunction)
@@ -611,10 +675,7 @@ namespace INA_Generations
 					double max = data.Max(x => x.OriginalSpecimen.Fx);
 					Parallel.ForEach(data,
 						dataRow => { dataRow.GxValue = -(dataRow.OriginalSpecimen.Fx - max) + Singleton.d; });
-
 					break;
-				default:
-					throw new NotImplementedException();
 			}
 		}
 	}

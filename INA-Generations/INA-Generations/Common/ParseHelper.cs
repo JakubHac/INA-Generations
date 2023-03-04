@@ -7,6 +7,14 @@ namespace INA_Generations
 {
 	public static class ParseHelper
 	{
+		/// <summary>
+		/// Parses a double from a string
+		/// </summary>
+		/// <param name="text">string we are parsing</param>
+		/// <param name="textName">name of the textBox this string comes from</param>
+		/// <param name="output">output value</param>
+		/// <param name="culture">culture override, if empty uses Current Culture</param>
+		/// <returns>true if the parsing was successful, false if the parsing failed</returns>
 		public static bool ParseDouble(string text, string textName, out double output, string culture = "")
 		{
 			if (culture.Length == 0)
@@ -31,6 +39,14 @@ namespace INA_Generations
 			return false;
 		}
 
+		/// <summary>
+		/// Parses a long[] from a string
+		/// </summary>
+		/// <param name="text">string we are parsing</param>
+		/// <param name="fieldName">name of the textBox this string comes from</param>
+		/// <param name="longArray">output value</param>
+		/// <param name="errorMessage">error message to show if the parsing failed</param>
+		/// <returns>true if the parsing was successful, false if the parsing failed</returns>
 		public static bool ParseLongArray(string text, string fieldName, string errorMessage, out long[] longArray)
 		{
 			longArray = Array.Empty<long>();
@@ -51,6 +67,14 @@ namespace INA_Generations
 			}
 		}
 
+		/// <summary>
+		/// Parses a double[] from a string
+		/// </summary>
+		/// <param name="text">string we are parsing</param>
+		/// <param name="fieldName">name of the textBox this string comes from</param>
+		/// <param name="doubleArray">output value</param>
+		/// <param name="errorMessage">error message to show if the parsing failed</param>
+		/// <returns>true if the parsing was successful, false if the parsing failed</returns>
 		public static bool ParseDoubleArray(string text, string fieldName, string errorMessage, out double[] doubleArray)
 		{
 			doubleArray = Array.Empty<double>();
@@ -71,6 +95,14 @@ namespace INA_Generations
 			}
 		}
 		
+		/// <summary>
+		/// Parses a long from a string
+		/// </summary>
+		/// <param name="text">string we are parsing</param>
+		/// <param name="textName">name of the textBox this string comes from</param>
+		/// <param name="output">output value</param>
+		/// <param name="culture">culture override, if empty uses Current Culture</param>
+		/// <returns>true if the parsing was successful, false if the parsing failed</returns>
 		public static bool ParseLong(string text, string textName, out long output, string culture = "")
 		{
 			if (culture.Length == 0)
