@@ -6,8 +6,49 @@ namespace INA_Generations
 {
 	public class DataRow
 	{
-		// public static DataRow Empty = new(null, -1);
+		[DisplayInGridView("N")] public long Index;
 
+		[DisplayInGridView("xReal", -1)] public string xReal => OriginalSpecimen?.XReal.ToString();
+		[DisplayInGridView("F(x)", -2)] public string Fx => OriginalSpecimen?.Fx.ToString("N20").TrimEnd('0');
+		[DisplayInGridView("G(x)", -3)] public string Gx => GxValue.ToString("N20").TrimEnd('0');
+		[DisplayInGridView("P(x)", -4)] public string Px => PxValue.ToString("N20").TrimEnd('0');
+		[DisplayInGridView("Q(x)", -5)] public string Qx => QxValue.ToString("N20").TrimEnd('0');
+		[DisplayInGridView("r", -6)] public string R1 => SelectionRandom.ToString("N20").TrimEnd('0');
+		[DisplayInGridView("sel xReal", -7)] public string SelectionXReal => SelectionValue?.XReal.ToString();
+		[DisplayInGridView("sel xBin", -8)] public string SelectionXBin => SelectionValue?.XBin;
+		[DisplayInGridView("Rodzic 1", -9)] public string FirstParentXBin => isParent ? SelectionXBin : "-";
+
+		[DisplayInGridView("Rodzic 2", -10)]
+		public string SecondParentXBin => ParentsWith != null ? ParentsWith.SelectionXBin : "-";
+
+		[DisplayInGridView("PC", -11)] public string PC => PCValue != null ? PCValue.ToString() : "-";
+		[DisplayInGridView("Dziecko", -12)] public string Child => ChildXBin ?? "-";
+
+		[DisplayInGridView("Po Krzyżowaniu", -13)]
+		public string AfterChild => ChildXBin != null ? ChildXBin.Replace(" | ", "") : SelectionXBin;
+
+		[DisplayInGridView("Zmutowane Geny", -14)]
+		public string MutatedGenes => MutatedGenesValue.Count > 0
+			? MutatedGenesValue.Aggregate("", (s, i) => $"{s},{i + 1}").Substring(1)
+			: "-";
+
+		[DisplayInGridView("M xBin", -15)]
+		public string MutatedChromosome => ReplacedByElite ? "NADPISANY PRZEZ ELITĘ" : MutatedChromosomeValue ?? "-";
+
+		[DisplayInGridView("M xReal", -16)] public double FinalXRealValue;
+
+		[DisplayInGridView("M F(x)", -17)] public string FinalFxReal => FinalFxRealValue.ToString("N20").TrimEnd('0');
+
+
+		public string ChildXBin = null;
+		public double GxValue;
+		public double PxValue;
+		public double QxValue;
+		public Specimen SelectionValue;
+		public string MutatedChromosomeValue = null;
+		public double FinalFxRealValue;
+		public bool isParent => ParentRandom < Singleton.PK;
+		public DataRow ParentsWith = null;
 		public Specimen OriginalSpecimen;
 		public double SelectionRandom;
 		public double ParentRandom = Double.PositiveInfinity;
@@ -25,7 +66,7 @@ namespace INA_Generations
 		{
 			SelectionRandom = skipRoulette ? Singleton.Random.NextDouble() : Singleton.GetRandomWithRoulette();
 		}
-		
+
 		public void RandomizeParenting()
 		{
 			switch (Singleton.RandomRoulette)
@@ -52,58 +93,9 @@ namespace INA_Generations
 						var result = Singleton.GetRandomWithRoulette(pieChart);
 						ParentRandom = result.r;
 					}
+
 					break;
 			}
-			
 		}
-
-		[DisplayInGridView("N")]
-		public string N => Index.ToString();
-		[DisplayInGridView("xReal")]
-		public string xReal => OriginalSpecimen?.XReal.ToString();
-		[DisplayInGridView("F(x)")]
-		public string Fx => OriginalSpecimen?.Fx.ToString("N20").TrimEnd('0');
-		[DisplayInGridView("G(x)")]
-		public string Gx => GxValue.ToString("N20").TrimEnd('0');
-		[DisplayInGridView("P(x)")]
-		public string Px => PxValue.ToString("N20").TrimEnd('0');
-		[DisplayInGridView("Q(x)")]
-		public string Qx => QxValue.ToString("N20").TrimEnd('0');
-		[DisplayInGridView("r")]
-		public string R1 => SelectionRandom.ToString("N20").TrimEnd('0');
-		[DisplayInGridView("sel xReal")]
-		public string SelectionXReal => SelectionValue?.XReal.ToString();
-		[DisplayInGridView("sel xBin")]
-		public string SelectionXBin => SelectionValue?.XBin;
-		[DisplayInGridView("Rodzic 1")]
-		public string FirstParentXBin => isParent ? SelectionXBin : "-";
-		[DisplayInGridView("Rodzic 2")]
-		public string SecondParentXBin => ParentsWith != null ? ParentsWith.SelectionXBin : "-";
-		[DisplayInGridView("PC")]
-		public string PC => PCValue != null ? PCValue.ToString() : "-";
-		[DisplayInGridView("Dziecko")]
-		public string Child => ChildXBin ?? "-";
-		[DisplayInGridView("Po Krzyżowaniu")]
-		public string AfterChild => ChildXBin != null ? ChildXBin.Replace(" | ", "") : SelectionXBin;
-		[DisplayInGridView("Zmutowane Geny")]
-		public string MutatedGenes => MutatedGenesValue.Count > 0 ? MutatedGenesValue.Aggregate("", (s, i) => $"{s},{i+1}").Substring(1) : "-";
-		[DisplayInGridView("M xBin")]
-		public string MutatedChromosome => ReplacedByElite ? "NADPISANY PRZEZ ELITĘ" : MutatedChromosomeValue ?? "-";
-		[DisplayInGridView("M xReal")]
-		public string FinalXReal => FinalXRealValue.ToString();
-		[DisplayInGridView("M F(x)")]
-		public string FinalFxReal => FinalFxRealValue.ToString("N20").TrimEnd('0');
-
-		public string ChildXBin = null;
-		public double GxValue;
-		public double PxValue;
-		public double QxValue;
-		public Specimen SelectionValue;
-		public string MutatedChromosomeValue = null;
-		public double FinalXRealValue;
-		public double FinalFxRealValue;
-		public bool isParent => ParentRandom < Singleton.PK;
-		public DataRow ParentsWith = null;
-		public long Index;
 	}
 }

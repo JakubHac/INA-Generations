@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.ObjectModel;
-using System.Linq;
 using Eto.Forms;
 using ScottPlot.Eto;
 

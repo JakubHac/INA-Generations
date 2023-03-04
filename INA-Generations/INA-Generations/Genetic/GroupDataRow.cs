@@ -2,10 +2,6 @@
 {
 	public class GroupDataRow
 	{
-		public GroupDataRow()
-		{
-		}
-
 		public GroupDataRow(long index, double xRealValue, double percentValue)
 		{
 			Index = index;
@@ -14,23 +10,18 @@
 			FxValue = MathHelper.Fx(xRealValue);
 			PercentValue = percentValue;
 		}
-
-
-		private long Index;
-		private double XRealValue;
-		public string XBinValue = "";
-		private double FxValue;
-		private double PercentValue;
 		
 		[DisplayInGridView("N")]
-		public string N => Index.ToString();
+		public long Index;
 		[DisplayInGridView("xReal")]
-		public string XReal => XRealValue.ToString();
+		public double XRealValue;
 		[DisplayInGridView("xBin")]
-		public string XBin => XBinValue;
+		public string XBinValue = "";
 		[DisplayInGridView("F(x)")]
-		public string Fx => FxValue.ToString();
-		[DisplayInGridView("%")]
-		public string Percent => PercentValue.ToString();
+		public double FxValue;
+		[DisplayInGridView("%",-1)]
+		public string PercentString => (PercentValue / 100.0).ToString("P");
+		
+		public double PercentValue;
 	}
 }

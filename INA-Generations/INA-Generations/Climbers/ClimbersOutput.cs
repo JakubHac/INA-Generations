@@ -2,15 +2,19 @@
 {
 	public class ClimbersOutput
 	{
-		[DisplayInGridView("Kroki")]
+		[DisplayInGridView("Kroki")] 
 		public long NumberOfSteps;
 		[DisplayInGridView("Ilość Rozwiązań")]
 		public long NumberOfSolutions;
-		[DisplayInGridView("Procent Ilości Rozwiązań")]
-		public double HitPercent;
-		[DisplayInGridView("Kumulatywna Ilość rozwiązań")]
+		[DisplayInGridView("Kumulatywna Ilość rozwiązań", -2)]
 		public long AggregateNumberOfSolutions;
-		[DisplayInGridView("Kumulatywny Procent Ilości Rozwiązań")]
+		[DisplayInGridView("Procent Ilości Rozwiązań", -1)]
+		public string HitPercentString => HitPercent.ToString("P");
+		[DisplayInGridView("Kumulatywny Procent Ilości Rozwiązań", -3)]
+		public string AggregateHitPercentString => AggregateHitPercent.ToString("P");
+		
+		public double HitPercent;
+		
 		public double AggregateHitPercent;
 
 		public ClimbersOutput(long numberOfSteps, long numberOfSolutions, long aggregateNumberOfSolutions, double hitPercent, double aggregateHitPercent)
