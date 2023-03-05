@@ -9,6 +9,9 @@ namespace INA_Generations
 {
 	public partial class MainForm
 	{
+		/// <summary>
+		/// Executes the Hill Climb algorithm with the given parameters
+		/// </summary>
 		private void ExecuteClimbers()
 		{
 			if (!(
@@ -103,6 +106,10 @@ namespace INA_Generations
 			}
 		}
 		
+		/// <summary>
+		/// Finds the best value in the range [a, b] by checking every single value
+		/// </summary>
+		/// <returns></returns>
 		private double BruteForceBestValue()
 		{
 			Specimen tester = new(0);
@@ -129,6 +136,10 @@ namespace INA_Generations
 			return bestSoFar;
 		}
 		
+		/// <summary>
+		/// Executes the Hill Climb algorithm for multiple iterations
+		/// </summary>
+		/// <param name="t"></param>
 		private void ClimbersExecuteMultiIter(long t)
 		{
 			var bestOfEveryIter = ClimbersOuterLoop(t);
@@ -169,6 +180,11 @@ namespace INA_Generations
 			ClimbersMultiOutputTable.Visible = false;
 		}
 
+		/// <summary>
+		/// Executes the outer loop of the Hill Climb algorithm
+		/// </summary>
+		/// <param name="t">number of iterations</param>
+		/// <returns>Best specimens of every iteration</returns>
 		private static List<Specimen> ClimbersOuterLoop(long t)
 		{
 			List<Specimen> BestOfEveryIter = new();
@@ -203,6 +219,9 @@ namespace INA_Generations
 			return BestOfEveryIter;
 		}
 
+		/// <summary>
+		/// Executes the Hill Climb algorithm for a single iteration
+		/// </summary>
 		private void ClimbersExecuteSingleIter()
 		{
 			var progressHistory = ClimbersInnerLoop();
@@ -223,6 +242,10 @@ namespace INA_Generations
 			ClimbersMultiOutputTable.Visible = false;
 		}
 
+		/// <summary>
+		/// Inner loop of the Hill Climb algorithm, which executes until a local maximum is found
+		/// </summary>
+		/// <returns></returns>
 		private static List<Specimen> ClimbersInnerLoop()
 		{
 			Specimen Vc = new();
@@ -246,6 +269,12 @@ namespace INA_Generations
 			return progressHistory;
 		}
 
+		/// <summary>
+		/// Checks if the neighbor is better than the current specimen
+		/// </summary>
+		/// <param name="bestFx">best F(x)</param>
+		/// <param name="Vc">neighbor specimen</param>
+		/// <returns></returns>
 		private static bool IsNeighborBetter(double bestFx, Specimen Vc)
 		{
 			bool neighborIsBetter = false;
@@ -262,6 +291,12 @@ namespace INA_Generations
 			return neighborIsBetter;
 		}
 
+		/// <summary>
+		/// Finds the best neighbor of the current specimen
+		/// </summary>
+		/// <param name="Vc">current specimen</param>
+		/// <param name="bestFx">best F(x) found</param>
+		/// <param name="bestNeighbor">best neighbors xBin</param>
 		private static void FindBestNeighbor(Specimen Vc, out double bestFx, out string bestNeighbor)
 		{
 			var neighborsBin = FindNeighborsXBin(Vc);
@@ -293,6 +328,11 @@ namespace INA_Generations
 			}
 		}
 
+		/// <summary>
+		/// Calculates the F(x) of all neighbors
+		/// </summary>
+		/// <param name="neighbors">neighbors xBin values</param>
+		/// <returns>neighbors F(x) values</returns>
 		private static double[] CalculateNeighborsFx(string[] neighbors)
 		{
 			double[] neighborsFx = new double[neighbors.Length];
@@ -304,6 +344,11 @@ namespace INA_Generations
 			return neighborsFx;
 		}
 
+		/// <summary>
+		/// Returns all neighbors of the current specimen
+		/// </summary>
+		/// <param name="Vc">current specimen</param>
+		/// <returns>xBin values of the neighbors</returns>
 		private static string[] FindNeighborsXBin(Specimen Vc)
 		{
 			string[] neighbors = new string[Vc.XBin.Length];

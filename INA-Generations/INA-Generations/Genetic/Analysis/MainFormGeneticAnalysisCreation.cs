@@ -21,6 +21,9 @@ namespace INA_Generations
 		private StackLayout Analysis_Inputs;
 		private DropDown Analysis_TargetFunctionDropdown;
 
+		/// <summary>
+		/// Creates all the controls needed for the analysis of the genetic algorithm
+		/// </summary>
 		private void CreateGeneticsAnalysis()
 		{
 			Analysis_Inputs = CreateAnalysisInputs();
@@ -52,6 +55,9 @@ namespace INA_Generations
 			};
 		}
 		
+		/// <summary>
+		/// Creates the inputs for the genetic algorithm analysis
+		/// </summary>
 		private StackLayout CreateAnalysisInputs()
         {
             Analysis_AInput = new()
@@ -171,17 +177,10 @@ namespace INA_Generations
                 }
             };
         }
-		
-		private void ClearAnalysisOutputTable()
-		{
-			AnalysisOutputTable.DataStore = Array.Empty<AnalysisDataRow>();
-		}
-		
-		private void AddAnalysisDataToTable(List<AnalysisDataRow> dataAnalysis)
-		{
-			AnalysisOutputTable.DataStore = dataAnalysis;
-		}
-		
+
+		/// <summary>
+		/// Creates the table for the analysis output
+		/// </summary>
 		private void CreateAnalysisOutputTable()
 		{
 			AnalysisOutputTable = new()

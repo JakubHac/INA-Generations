@@ -7,6 +7,9 @@ namespace INA_Generations
 	public partial class MainForm
 	{
 
+		/// <summary>
+		/// Executes the analysis process of the genetic algorithm with the given parameters
+		/// </summary>
 		private void StartAnalysis()
 		{
 			if (!(ParseHelper.ParseDouble(Analysis_AInput.Text, "A", out double a) &&
@@ -43,7 +46,7 @@ namespace INA_Generations
 			int l = (int)Math.Floor(Math.Log((b - a) / d, 2) + 1.0);
 			Singleton.l = l;
 
-			ClearAnalysisOutputTable();
+			AnalysisOutputTable.ClearData<AnalysisDataRow>();
 
 			for (long n = 0; n < Ns.Length; n++)
 			{
@@ -70,7 +73,7 @@ namespace INA_Generations
 
 					for (int j = 0; j < Ts[l2]; j++)
 					{
-						RunGeneration(data, elite, j, Ts, l2);
+						RunGeneration(data, elite, j, Ts[l2]);
 					}
 
 					FXs.Add(data.Average(x => x.FinalFxRealValue));
@@ -90,10 +93,17 @@ namespace INA_Generations
 					.ToList();
 			}
 
-			AddAnalysisDataToTable(analysisDataRows);
+			AnalysisOutputTable.SetData(analysisDataRows);
 		}
 
-		private void RunGeneration(DataRow[] data, bool elite, int j, long[] Ts, long t)
+		/// <summary>
+		/// Runs the genetic algorithm for one generation
+		/// </summary>
+		/// <param name="data">current generation</param>
+		/// <param name="elite">should the elite specimen be carried over</param>
+		/// <param name="currentGenerationIndex">current generation index</param>
+		/// <param name="desiredGenerationCount">max generation index</param>
+		private void RunGeneration(DataRow[] data, bool elite, int currentGenerationIndex, long desiredGenerationCount)
 		{
 			CalculateGx(data);
 			CalculatePx(data);
@@ -106,7 +116,7 @@ namespace INA_Generations
 			Mutate(data, elite);
 			Finalize(data);
 
-			if (j + 1 < Ts[t])
+			if (currentGenerationIndex + 1 <desiredGenerationCount)
 			{
 				MoveDataToNextGeneration(data);
 			}

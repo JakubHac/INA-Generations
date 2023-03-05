@@ -27,6 +27,9 @@ namespace INA_Generations
 
 		private DropDown Climbers_TargetFunctionDropdown;
 
+		/// <summary>
+		/// Creates all the controls needed for the Hill Climb algorithm
+		/// </summary>
 		private void CreateClimbers()
 		{
 			Climbers_Inputs = CreateClimbersInputs();
@@ -92,6 +95,9 @@ namespace INA_Generations
 			};
 		}
 		
+		/// <summary>
+		/// Creates the output table for the multiple iteration table of the Hill Climb algorithm
+		/// </summary>
 		private void CreateClimbersMultiOutputTable()
         {
             ClimbersMultiOutputTable = new()
@@ -101,6 +107,9 @@ namespace INA_Generations
             ClimbersMultiOutputTable.AddColumns<ClimbersOutput>();
         }
 
+		/// <summary>
+		/// Creates the inputs for the Hill Climb algorithm
+		/// </summary>
         private StackLayout CreateClimbersInputs()
         {
             Climbers_AInput = new()
@@ -183,6 +192,9 @@ namespace INA_Generations
             };
         }
 
+		/// <summary>
+		/// Creates the output table for a single iteration of the Hill Climb algorithm
+		/// </summary>
         public void CreateClimbersOutputTable()
         {
             ClimbersOutputTable = new()

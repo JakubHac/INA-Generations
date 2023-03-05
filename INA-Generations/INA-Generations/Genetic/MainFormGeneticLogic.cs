@@ -13,6 +13,9 @@ namespace INA_Generations
 {
 	public partial class MainForm
 	{
+		/// <summary>
+		/// Executes the genetic algorithm with the given parameters
+		/// </summary>
 		private void ExecuteGeneration()
 		{
 			if (!(
