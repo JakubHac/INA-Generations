@@ -102,7 +102,7 @@ namespace INA_Generations
 			Parenting(data);
 			PairParents(data);
 			RandomizePC(data);
-			Fuck(data);
+			CreateChildren(data);
 			Mutate(data, elite);
 			Finalize(data);
 
